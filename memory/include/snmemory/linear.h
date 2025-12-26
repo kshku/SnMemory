@@ -31,7 +31,7 @@ typedef uint8_t *snMemoryMark;
  * @return Returns true on success, false otherwise.
  */
 SN_FORCE_INLINE bool sn_linear_allocator_init(snLinearAllocator *alloc, void *mem, uint64_t size) {
-    if (!mem || !size) return false;
+    if (!alloc || !mem || !size) return false;
 
     *alloc = (snLinearAllocator){
         .mem = (uint8_t *)mem,
@@ -128,8 +128,8 @@ SN_FORCE_INLINE snMemoryMark sn_linear_allocator_get_memory_mark(snLinearAllocat
  * @param mark The mark
  */
 SN_FORCE_INLINE void sn_linear_allocator_free_to_memory_mark(snLinearAllocator *alloc, snMemoryMark mark) {
-    assert(((uint64_t)mark) >= ((uint64_t)alloc->mem));
-    assert(((uint64_t)mark) <= ((uint64_t)(alloc->mem + alloc->size)));
+    SN_ASSERT(((uint64_t)mark) >= ((uint64_t)alloc->mem));
+    SN_ASSERT(((uint64_t)mark) <= ((uint64_t)(alloc->mem + alloc->size)));
     alloc->top = mark;
 }
 

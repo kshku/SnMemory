@@ -31,7 +31,7 @@ typedef struct snStackAllocator {
  * @return Returns true on success, false otherwise.
  */
 SN_FORCE_INLINE bool sn_stack_allocator_init(snStackAllocator *alloc, void *mem, uint64_t size) {
-    if (!mem || !size) return false;
+    if (!alloc || !mem || !size) return false;
 
     *alloc = (snStackAllocator){
         .mem = (uint8_t *)mem,
@@ -86,7 +86,7 @@ SN_INLINE void *sn_stack_allocator_allocate(snStackAllocator *alloc, uint64_t si
 SN_INLINE void sn_stack_allocator_free(snStackAllocator *alloc, void *ptr) {
     snStackAllocatorFooter *footer = ((snStackAllocatorFooter *)alloc->top) - 1;
 
-    assert(footer->previous_top == (uint8_t *)(((uint64_t)ptr) - footer->align_diff));
+    SN_ASSERT(footer->previous_top == (uint8_t *)(((uint64_t)ptr) - footer->align_diff));
 
     alloc->top = footer->previous_top;
 }

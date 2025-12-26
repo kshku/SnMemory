@@ -2,6 +2,8 @@ set(HEADERFILES
     platform.h
     defines.h
     linear.h
+    stack.h
+    pool.h
 )
 
 set(SRCS
