@@ -1,7 +1,7 @@
 set(HEADERFILES
     platform.h
     defines.h
-    snmemory.h
+    linear.h
 )
 
 set(SRCS

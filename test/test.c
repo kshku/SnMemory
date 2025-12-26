@@ -1,5 +1,4 @@
-#include <sntemplate/sntemplate.h>
+#include <snmemory/snmemory.h>
 
 int main(void) {
-    print_from_template();
 }
