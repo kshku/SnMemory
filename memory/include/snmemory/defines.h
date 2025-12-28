@@ -40,7 +40,7 @@
 
 #define SN_STATIC_ASSERT(cond, msg) _Static_assert(cond, msg)
 
-#define SN_ASSERT(x) assert((x))
+#define SN_ASSERT(x) assert(x)
 
 #define SN_SHOULD_NOT_REACH_HERE (SN_ASSERT(false))
 
@@ -56,12 +56,29 @@
 
 #define SN_PTR_DIFF(a, b) (((uint64_t)(a)) - ((uint64_t)(b)))
 
-#define SN_MAX(a, b) ((a) < (b) ? (a) : (b))
+#define SN_MAX(a, b) ((a) > (b) ? (a) : (b))
 
-#define SN_MIN(a, b) ((a) > (b) ? (a) : (b))
+#define SN_MIN(a, b) ((a) < (b) ? (a) : (b))
 
 #define SN_CLAMP(x, min, max) ((x) < (min) ? (min) : (x) > (max) ? max : (x))
 
 #define SN_UNUSED(x) (void)(x)
 
 #define SN_ARRAY_LENGTH(arr) (sizeof(arr) / sizeof(arr[0]))
+
+#define SN_BIT_FLAG(n) (1 << (n))
+
+#define SN_BIT_SET(x, n) ((x) |= SN_BIT_FLAG((n)))
+
+#define SN_BIT_CLEAR(x, n) ((x) &= ~SN_BIT_FLAG((n)))
+
+#define SN_BIT_TOGGLE(x, n) ((x) ^= SN_BIT_FLAG((n)))
+
+#define SN_BIT_CHECK(x, n) ((x) & SN_BIT_FLAG((n)))
+
+#define SN_BIT_SET_VALUE(x, n) ((x) | SN_BIT_FLAG((n)))
+
+#define SN_BIT_CLEARED_VALUE(x, n) ((x) & ~SN_BIT_FLAG((n)))
+
+#define SN_BIT_TOGGLED_VALUE(x, n) ((x) ^ SN_BIT_FLAG((n)))
+

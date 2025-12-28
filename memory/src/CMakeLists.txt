@@ -4,10 +4,12 @@ set(HEADERFILES
     linear.h
     stack.h
     pool.h
+    freelist.h
 )
 
 set(SRCS
     snmemory.c
+    freelist.c
 )
 
 set(INCLUDE_BASE "${PROJECT_SOURCE_DIR}/memory/include/snmemory")

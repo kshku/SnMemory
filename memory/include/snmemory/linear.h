@@ -130,6 +130,6 @@ SN_FORCE_INLINE snMemoryMark sn_linear_allocator_get_memory_mark(snLinearAllocat
 SN_FORCE_INLINE void sn_linear_allocator_free_to_memory_mark(snLinearAllocator *alloc, snMemoryMark mark) {
     SN_ASSERT(((uint64_t)mark) >= ((uint64_t)alloc->mem));
     SN_ASSERT(((uint64_t)mark) <= ((uint64_t)(alloc->mem + alloc->size)));
-    alloc->top = mark;
+    if (alloc->top > mark) alloc->top = mark;
 }
 
