@@ -8,7 +8,6 @@ set(HEADERFILES
 )
 
 set(SRCS
-    snmemory.c
     freelist.c
 )
 

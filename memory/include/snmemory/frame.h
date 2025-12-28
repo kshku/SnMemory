@@ -15,6 +15,7 @@
  * - Backed by a linear allocator
  * - Not thread-safe
  * - Intended for per-frame temporary allocations
+ * - Nesting is not supported
  */
 typedef struct snFrameAllocator {
     snLinearAllocator arena; /**< Underlying linear allocator */

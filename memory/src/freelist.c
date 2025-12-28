@@ -81,7 +81,8 @@ void *sn_freelist_allocator_reallocate(snFreeListAllocator *alloc, void *ptr, ui
 
     if (current_size >= new_size) {
         // Fake this node as freenode and make it point to next free node
-        node->next = previous_freenode->next;
+        if (previous_freenode) node->next = previous_freenode->next;
+        else node->next = alloc->free_list;
 
         split_node_if_possible(node, new_size + align);
 

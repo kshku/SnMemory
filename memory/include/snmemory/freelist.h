@@ -78,7 +78,7 @@ SN_FORCE_INLINE void sn_freelist_allocator_deinit(snFreeListAllocator *alloc) {
  *
  * @return Pointer to allocated memory or NULL on failure
  */
-SN_INLINE void *sn_freelist_allocator_allocate(snFreeListAllocator *alloc, uint64_t size, uint64_t align);
+SN_API void *sn_freelist_allocator_allocate(snFreeListAllocator *alloc, uint64_t size, uint64_t align);
 
 /**
  * @brief Free memory allocated by free-list allocator.

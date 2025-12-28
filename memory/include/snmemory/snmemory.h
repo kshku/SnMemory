@@ -5,3 +5,4 @@
 #include "snmemory/stack.h"
 #include "snmemory/pool.h"
 #include "snmemory/frame.h"
+#include "snmemory/freelist.h"
