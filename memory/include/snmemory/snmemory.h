@@ -6,3 +6,4 @@
 #include "snmemory/pool.h"
 #include "snmemory/frame.h"
 #include "snmemory/freelist.h"
+#include "snmemory/vm.h"

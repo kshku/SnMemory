@@ -416,6 +416,47 @@ static void test_freelist_full_reuse(void) {
     TEST_ASSERT(free_size >= KB(15)); // Almost entire buffer
 }
 
+static void test_vm_basic(void) {
+    uint64_t page_size = sn_vm_get_page_size();
+    TEST_ASSERT(page_size > 0);
+
+    const uint32_t pages = 4;
+
+    /* Reserve address space */
+    void *ptr = sn_vm_reserve(pages);
+    TEST_ASSERT(ptr != NULL);
+
+    /* Commit pages */
+    bool committed = sn_vm_commit(ptr, pages);
+    TEST_ASSERT(committed);
+
+    /* Write test: memory must be writable after commit */
+    uint8_t *mem = (uint8_t *)ptr;
+    for (uint64_t i = 0; i < pages * page_size; i++) {
+        mem[i] = (uint8_t)(i & 0xFF);
+    }
+
+    /* Read-back test */
+    for (uint64_t i = 0; i < pages * page_size; i++) {
+        TEST_ASSERT(mem[i] == (uint8_t)(i & 0xFF));
+    }
+
+    /* Decommit */
+    bool decommitted = sn_vm_decommit(ptr, pages);
+    TEST_ASSERT(decommitted);
+
+    /*
+        NOTE:
+        We intentionally do NOT touch memory after decommit.
+        On most OSes this would segfault and that is correct behavior.
+    */
+
+    /* Release address space */
+    bool released = sn_vm_release(ptr, pages);
+    TEST_ASSERT(released);
+}
+
+
 int main(void) {
     int n = 100;
 
@@ -467,6 +508,11 @@ int main(void) {
         test_freelist_full_reuse();
 
         printf("Free-list allocator tests passed ✅\n\n");
+
+        printf("Running test_vm_basic...\n");
+        test_vm_basic();
+
+        printf("VM tests passed ✅\n\n");
 
     }
 
