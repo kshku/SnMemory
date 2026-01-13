@@ -32,7 +32,7 @@
 
 #define SN_INLINE static inline
 
-#if defined(SN_COMILER_MSVC)
+#if defined(SN_COMPILER_MSVC)
     #define SN_FORCE_INLINE static __forceinline
 #else
     #define SN_FORCE_INLINE static inline __attribute__((always_inline))
@@ -60,7 +60,7 @@
 
 #define SN_MIN(a, b) ((a) < (b) ? (a) : (b))
 
-#define SN_CLAMP(x, min, max) ((x) < (min) ? (min) : (x) > (max) ? max : (x))
+#define SN_CLAMP(x, min, max) ((x) < (min) ? (min) : (x) > (max) ? (max) : (x))
 
 #define SN_UNUSED(x) (void)(x)
 
