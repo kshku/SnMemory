@@ -2,6 +2,7 @@
 
 #include "snmemory/defines.h"
 
+#include "snmemory/api.h"
 
 typedef struct snFreeNode {
     uint64_t size;
@@ -133,3 +134,4 @@ SN_INLINE uint64_t sn_freelist_allocator_get_free_size(snFreeListAllocator *allo
     return size;
 }
 
+#undef SN_API

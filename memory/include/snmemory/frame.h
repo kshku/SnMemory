@@ -1,7 +1,6 @@
 #pragma once
 
 #include "snmemory/defines.h"
-
 #include "snmemory/linear.h"
 
 /**
