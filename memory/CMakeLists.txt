@@ -3,7 +3,7 @@ if(SN_MEMORY_BUILD_SHARED)
     target_compile_definitions(snmemory PRIVATE SN_EXPORT)
 else()
     add_library(snmemory STATIC)
-    target_compile_definitions(snmemory PRIVATE SN_MEMORY_STATIC)
+    target_compile_definitions(snmemory PUBLIC SN_MEMORY_STATIC)
 endif()
 
 target_include_directories(snmemory PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")

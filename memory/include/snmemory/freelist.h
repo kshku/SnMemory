@@ -10,7 +10,7 @@ typedef struct snFreeNode {
 } snFreeNode;
 
 #ifndef SN_FREELIST_SPLITTING_THRESHOLD
-    #define SN_FREELIST_SPLITTING_THRESHOLD (2 * alignof(max_align_t))
+    #define SN_FREELIST_SPLITTING_THRESHOLD (2 * 16)
 #endif
 
 /**
