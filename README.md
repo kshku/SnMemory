@@ -5,6 +5,8 @@ Memory allocator library written in C.
 SnMemory does **not** depend on malloc/free internally — all allocators
 operate on user-provided memory buffers.
 
+Also includes the virtual memory abstraction.
+
 ## Allocators
 1. Linear / Arena allocator
 2. Stack allocator
