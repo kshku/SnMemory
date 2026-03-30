@@ -51,6 +51,7 @@ SN_FORCE_INLINE bool sn_linear_allocator_init(snLinearAllocator *alloc, void *me
  * @param alloc Pointer to the allocator context.
  */
 SN_FORCE_INLINE void sn_linear_allocator_deinit(snLinearAllocator *alloc) {
+    if (!alloc) return;
     *alloc = (snLinearAllocator){0};
 }
 
@@ -64,6 +65,8 @@ SN_FORCE_INLINE void sn_linear_allocator_deinit(snLinearAllocator *alloc) {
  * @return Returns pointer to allocated memory or NULL no failure.
  */
 SN_INLINE void *sn_linear_allocator_allocate(snLinearAllocator *alloc, uint64_t size, uint64_t align) {
+    if (!size || !align || !alloc) return NULL;
+
     uint8_t *aligned = (uint8_t *)SN_GET_ALIGNED(alloc->top, align);
 
     if (aligned + size > alloc->mem + alloc->size) return NULL;
@@ -80,6 +83,7 @@ SN_INLINE void *sn_linear_allocator_allocate(snLinearAllocator *alloc, uint64_t 
  * @param alloc Pointer to the allocator context.
  */
 SN_FORCE_INLINE void sn_linear_allocator_reset(snLinearAllocator *alloc) {
+    if (!alloc) return;
     alloc->top = alloc->mem;
 }
 
@@ -91,6 +95,7 @@ SN_FORCE_INLINE void sn_linear_allocator_reset(snLinearAllocator *alloc) {
  * @return Returns size of memory that is not available for allocation.
  */
 SN_FORCE_INLINE uint64_t sn_linear_allocator_get_allocated_size(snLinearAllocator *alloc) {
+    if (!alloc) return 0;
     return SN_PTR_DIFF(alloc->top, alloc->mem);
 }
 
@@ -105,6 +110,7 @@ SN_FORCE_INLINE uint64_t sn_linear_allocator_get_allocated_size(snLinearAllocato
  * few bytes might be unused for maintaining alignment.
  */
 SN_FORCE_INLINE uint64_t sn_linear_allocator_get_remaining_size(snLinearAllocator *alloc) {
+    if (!alloc) return 0;
     return SN_PTR_DIFF(alloc->mem + alloc->size, alloc->top);
 }
 
@@ -118,6 +124,7 @@ SN_FORCE_INLINE uint64_t sn_linear_allocator_get_remaining_size(snLinearAllocato
  * @return Returns @ref snMemoryMark.
  */
 SN_FORCE_INLINE snMemoryMark sn_linear_allocator_get_memory_mark(snLinearAllocator *alloc) {
+    if (!alloc) return NULL;
     return alloc->top;
 }
 
@@ -128,6 +135,8 @@ SN_FORCE_INLINE snMemoryMark sn_linear_allocator_get_memory_mark(snLinearAllocat
  * @param mark The mark
  */
 SN_FORCE_INLINE void sn_linear_allocator_free_to_memory_mark(snLinearAllocator *alloc, snMemoryMark mark) {
+    if (!alloc || !mark) return;
+
     SN_ASSERT(((uint64_t)mark) >= ((uint64_t)alloc->mem));
     SN_ASSERT(((uint64_t)mark) <= ((uint64_t)(alloc->mem + alloc->size)));
     if (alloc->top > mark) alloc->top = mark;

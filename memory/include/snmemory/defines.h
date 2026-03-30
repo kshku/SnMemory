@@ -30,7 +30,7 @@
 
 #define SN_GET_NEXT_ALIGNED(x, align) ((((uint64_t)(x)) + (align)) & ~((align) - 1))
 
-#define SN_GET_NEXT_ALIGNED_PTR(x, type) ((type *)SN_GET_ALIGNED_NEXT((x), alignof(type)))
+#define SN_GET_NEXT_ALIGNED_PTR(x, type) ((type *)SN_GET_NEXT_ALIGNED((x), alignof(type)))
 
 #define SN_PTR_DIFF(a, b) (((uint64_t)(a)) - ((uint64_t)(b)))
 

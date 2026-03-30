@@ -6,6 +6,9 @@ add_executable(sn_memory_test)
 target_sources(sn_memory_test PRIVATE ${SRCS})
 target_link_libraries(sn_memory_test PRIVATE snmemory)
 
+add_executable(test2 test2.c)
+target_link_libraries(test2 PRIVATE snmemory)
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND SN_MEMORY_BUILD_SHARED)
     add_custom_target(copy_dlls ALL
         COMMENT "Copy the dlls"

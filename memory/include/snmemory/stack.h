@@ -11,7 +11,7 @@ typedef struct snStackAllocatorFooter {
  * @struct snStackAllocator
  * @brief Struct to store stack allocator context.
  *
- * @note None of the sn_stack_allocator* functions is thread-safe.
+ * @note None of the sn_stack_allocator* functions are thread-safe.
  */
 typedef struct snStackAllocator {
     uint8_t *mem; /**< Pointer to memory */
@@ -51,6 +51,7 @@ SN_FORCE_INLINE bool sn_stack_allocator_init(snStackAllocator *alloc, void *mem,
  * @param alloc Pointer to the allocator context.
  */
 SN_FORCE_INLINE void sn_stack_allocator_deinit(snStackAllocator *alloc) {
+    if (!alloc) return;
     *alloc = (snStackAllocator){0};
 }
 
@@ -64,6 +65,8 @@ SN_FORCE_INLINE void sn_stack_allocator_deinit(snStackAllocator *alloc) {
  * @return Returns pointer to allocated memory or NULL no failure.
  */
 SN_INLINE void *sn_stack_allocator_allocate(snStackAllocator *alloc, uint64_t size, uint64_t align) {
+    if (!size || !align || !alloc) return NULL;
+
     uint8_t *aligned = (uint8_t *)SN_GET_ALIGNED(alloc->top, align);
 
     if (aligned + size + sizeof(snStackAllocatorFooter) + alignof(snStackAllocatorFooter) > alloc->mem + alloc->size) return NULL;
@@ -84,6 +87,8 @@ SN_INLINE void *sn_stack_allocator_allocate(snStackAllocator *alloc, uint64_t si
  * @param ptr The pointer to free.
  */
 SN_INLINE void sn_stack_allocator_free(snStackAllocator *alloc, void *ptr) {
+    if (!ptr || !alloc) return;
+
     snStackAllocatorFooter *footer = ((snStackAllocatorFooter *)alloc->top) - 1;
 
     SN_ASSERT(footer->previous_top == (uint8_t *)(((uint64_t)ptr) - footer->align_diff));
@@ -97,6 +102,7 @@ SN_INLINE void sn_stack_allocator_free(snStackAllocator *alloc, void *ptr) {
  * @param alloc Pointer to the allocator context.
  */
 SN_FORCE_INLINE void sn_stack_allocator_reset(snStackAllocator *alloc) {
+    if (!alloc) return;
     alloc->top = alloc->mem;
 }
 
@@ -108,6 +114,7 @@ SN_FORCE_INLINE void sn_stack_allocator_reset(snStackAllocator *alloc) {
  * @return Returns size of memory that is not available for allocation.
  */
 SN_FORCE_INLINE uint64_t sn_stack_allocator_get_allocated_size(snStackAllocator *alloc) {
+    if (!alloc) return 0;
     return SN_PTR_DIFF(alloc->top, alloc->mem);
 }
 
@@ -122,6 +129,7 @@ SN_FORCE_INLINE uint64_t sn_stack_allocator_get_allocated_size(snStackAllocator 
  * few bytes might be unused for maintaining alignment and headers.
  */
 SN_FORCE_INLINE uint64_t sn_stack_allocator_get_remaining_size(snStackAllocator *alloc) {
+    if (!alloc) return 0;
     return SN_PTR_DIFF(alloc->mem + alloc->size, alloc->top);
 }
 

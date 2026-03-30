@@ -20,6 +20,8 @@ static snFreeNode *get_previous_free_node(snFreeNode *freelist, snFreeNode *node
 static void split_node_if_possible(snFreeNode *node, uint64_t allocated_size);
 
 void *sn_freelist_allocator_allocate(snFreeListAllocator *alloc, uint64_t size, uint64_t align) {
+    if (!size || !align || !alloc) return NULL;
+
     if (!alloc->free_list) return NULL;
 
     size = SN_GET_ALIGNED(size, align);
@@ -42,7 +44,7 @@ void *sn_freelist_allocator_allocate(snFreeListAllocator *alloc, uint64_t size, 
 }
 
 void sn_freelist_allocator_free(snFreeListAllocator *alloc, void *ptr) {
-    if (!ptr) return;
+    if (!ptr || !alloc) return;
 
     uint64_t diff_to_node = read_from_bytes(PADDING_BYTE(ptr), true);
     snFreeNode *node = (snFreeNode *)(((uint8_t *)ptr) - diff_to_node);
@@ -62,7 +64,7 @@ void sn_freelist_allocator_free(snFreeListAllocator *alloc, void *ptr) {
 }
 
 void *sn_freelist_allocator_reallocate(snFreeListAllocator *alloc, void *ptr, uint64_t new_size, uint64_t align) {
-    if (!ptr || !new_size) return NULL;
+    if (!ptr || !new_size || !align || !alloc) return NULL;
 
     uint64_t diff_to_node = read_from_bytes(PADDING_BYTE(ptr), true);
     snFreeNode *node = (snFreeNode *)(((uint8_t *)ptr) - diff_to_node);

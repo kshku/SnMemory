@@ -63,4 +63,3 @@ SN_API bool sn_vm_release(void *ptr, uint32_t pages);
  */
 SN_API uint64_t sn_vm_get_page_size(void);
 
-#undef SN_API

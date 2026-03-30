@@ -45,6 +45,8 @@ SN_FORCE_INLINE bool sn_frame_allocator_init(snFrameAllocator *alloc, void *mem,
  * @note Does not free memory buffer
  */
 SN_FORCE_INLINE void sn_frame_allocator_deinit(snFrameAllocator *alloc) {
+    if (!alloc) return;
+
     sn_linear_allocator_deinit(&alloc->arena);
     alloc->frame_mark = NULL;
 }
@@ -57,6 +59,8 @@ SN_FORCE_INLINE void sn_frame_allocator_deinit(snFrameAllocator *alloc) {
  * All allocations after this call belong to the frame.
  */
 SN_FORCE_INLINE void sn_frame_allocator_begin(snFrameAllocator *alloc) {
+    if (!alloc) return;
+
     alloc->frame_mark = sn_linear_allocator_get_memory_mark(&alloc->arena);
 }
 
@@ -68,6 +72,8 @@ SN_FORCE_INLINE void sn_frame_allocator_begin(snFrameAllocator *alloc) {
  * Frees all allocations made since begin().
  */
 SN_FORCE_INLINE void sn_frame_allocator_end(snFrameAllocator *alloc) {
+    if (!alloc) return;
+
     SN_ASSERT(alloc->frame_mark != NULL);
     sn_linear_allocator_free_to_memory_mark(&alloc->arena, alloc->frame_mark);
     alloc->frame_mark = NULL;
@@ -83,6 +89,7 @@ SN_FORCE_INLINE void sn_frame_allocator_end(snFrameAllocator *alloc) {
  * @return Pointer to allocated memory or NULL on failure
  */
 SN_FORCE_INLINE void *sn_frame_allocator_allocate(snFrameAllocator *alloc, uint64_t size, uint64_t align) {
+    if (!alloc) return NULL;
     return sn_linear_allocator_allocate(&alloc->arena, size, align);
 }
 
@@ -92,6 +99,7 @@ SN_FORCE_INLINE void *sn_frame_allocator_allocate(snFrameAllocator *alloc, uint6
  * @param alloc Pointer to frame allocator
  */
 SN_FORCE_INLINE uint64_t sn_frame_allocator_get_frame_usage(snFrameAllocator *alloc) {
+    if (!alloc) return 0;
     return sn_linear_allocator_get_allocated_size(&alloc->arena);
 }
 
@@ -101,6 +109,7 @@ SN_FORCE_INLINE uint64_t sn_frame_allocator_get_frame_usage(snFrameAllocator *al
  * @param alloc Pointer to frame allocator
  */
 SN_FORCE_INLINE uint64_t sn_frame_allocator_get_remaining_size(snFrameAllocator *alloc) {
+    if (!alloc) return 0;
     return sn_linear_allocator_get_remaining_size(&alloc->arena);
 }
 

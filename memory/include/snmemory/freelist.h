@@ -67,6 +67,7 @@ SN_INLINE bool sn_freelist_allocator_init(snFreeListAllocator *alloc, void *mem,
  * @note Does not free memory buffer
  */
 SN_FORCE_INLINE void sn_freelist_allocator_deinit(snFreeListAllocator *alloc) {
+    if (!alloc) return;
     *alloc = (snFreeListAllocator){0};
 }
 
@@ -112,6 +113,7 @@ SN_API void *sn_freelist_allocator_reallocate(snFreeListAllocator *alloc, void *
  * @param alloc Pointer to allocator context
  */
 SN_FORCE_INLINE uint64_t sn_freelist_allocator_get_total_size(snFreeListAllocator *alloc) {
+    if (!alloc) return 0;
     return alloc->size;
 }
 
@@ -123,6 +125,7 @@ SN_FORCE_INLINE uint64_t sn_freelist_allocator_get_total_size(snFreeListAllocato
  * @note May include fragmentation
  */
 SN_INLINE uint64_t sn_freelist_allocator_get_free_size(snFreeListAllocator *alloc) {
+    if (!alloc) return 0;
     uint64_t size = 0;
 
     snFreeNode *node = alloc->free_list;
@@ -133,5 +136,3 @@ SN_INLINE uint64_t sn_freelist_allocator_get_free_size(snFreeListAllocator *allo
 
     return size;
 }
-
-#undef SN_API

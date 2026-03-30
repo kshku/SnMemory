@@ -5,6 +5,7 @@ set(HEADERFILES
     stack.h
     pool.h
     freelist.h
+    queue.h
     vm.h
 )
 

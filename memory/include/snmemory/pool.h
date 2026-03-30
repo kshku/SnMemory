@@ -77,6 +77,7 @@ SN_INLINE bool sn_pool_allocator_init(snPoolAllocator *alloc, void *mem, uint64_
  * @note Does not free memory buffer
  */
 SN_FORCE_INLINE void sn_pool_allocator_deinit(snPoolAllocator *alloc) {
+    if (!alloc) return;
     *alloc = (snPoolAllocator){0};
 }
 
@@ -88,6 +89,8 @@ SN_FORCE_INLINE void sn_pool_allocator_deinit(snPoolAllocator *alloc) {
  * @return Pointer to allocated block or NULL if exhausted
  */
 SN_FORCE_INLINE void *sn_pool_allocator_allocate(snPoolAllocator *alloc) {
+    if (!alloc) return NULL;
+
     void *ptr = alloc->free_list;
 
     if (alloc->free_list) {
@@ -109,6 +112,8 @@ SN_FORCE_INLINE void *sn_pool_allocator_allocate(snPoolAllocator *alloc) {
  * - ptr must not be freed twice
  */
 SN_FORCE_INLINE void sn_pool_allocator_free(snPoolAllocator *alloc, void *ptr) {
+    if (!ptr || !alloc) return;
+
     SN_ASSERT((uint8_t *)ptr >= alloc->mem);
     SN_ASSERT((uint8_t *)ptr < alloc->mem + alloc->size);
     SN_ASSERT(SN_IS_ALIGNED(ptr, alloc->block_align));
@@ -124,6 +129,7 @@ SN_FORCE_INLINE void sn_pool_allocator_free(snPoolAllocator *alloc, void *ptr) {
  * @param alloc Pointer to allocator context
  */
 SN_FORCE_INLINE uint64_t sn_pool_allocator_get_block_count(snPoolAllocator *alloc) {
+    if (!alloc) return 0;
     return alloc->block_count;
 }
 
@@ -133,6 +139,7 @@ SN_FORCE_INLINE uint64_t sn_pool_allocator_get_block_count(snPoolAllocator *allo
  * @param alloc Pointer to allocator context
  */
 SN_FORCE_INLINE uint64_t sn_pool_allocator_get_free_count(snPoolAllocator *alloc) {
+    if (!alloc) return 0;
     return alloc->free_count;
 }
 
@@ -142,6 +149,7 @@ SN_FORCE_INLINE uint64_t sn_pool_allocator_get_free_count(snPoolAllocator *alloc
  * @param alloc Pointer to allocator context
  */
 SN_FORCE_INLINE uint64_t sn_pool_allocator_get_used_count(snPoolAllocator *alloc) {
+    if (!alloc) return 0;
     return alloc->block_count - alloc->free_count;
 }
 
