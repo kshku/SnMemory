@@ -72,6 +72,7 @@ SN_INLINE void *sn_queue_allocator_allocate(snQueueAllocator *alloc, uint64_t si
     if (!size || !align || !alloc) return NULL;
 
     snQueueAllocatorHeader *head_header = (snQueueAllocatorHeader *)alloc->head;
+    uint8_t *mem_end = alloc->mem + alloc->size;
     
     uint8_t *raw_head = alloc->head ? head_header->next : alloc->mem;
     snQueueAllocatorHeader *new_head = SN_GET_ALIGNED_PTR(raw_head, snQueueAllocatorHeader);
@@ -82,8 +83,10 @@ SN_INLINE void *sn_queue_allocator_allocate(snQueueAllocator *alloc, uint64_t si
     uint64_t required_size = size + sizeof(snQueueAllocatorHeader) + align_diff;
 
     uint64_t free_size = 0;
-    if (!alloc->tail || alloc->tail < (uint8_t *)new_head) free_size = SN_PTR_DIFF(alloc->mem + alloc->size, new_head);
-    else if (((uint8_t *)new_head) < alloc->tail) free_size = SN_PTR_DIFF(alloc->tail, new_head);
+    if ((uint8_t *)new_head < mem_end) {
+        if (!alloc->tail || alloc->tail < (uint8_t *)new_head) free_size = SN_PTR_DIFF(mem_end, new_head);
+        else if (((uint8_t *)new_head) < alloc->tail) free_size = SN_PTR_DIFF(alloc->tail, new_head);
+    }
 
     // Wrapping
     if (free_size < required_size && alloc->tail && alloc->tail < (uint8_t *)new_head) {
@@ -95,6 +98,7 @@ SN_INLINE void *sn_queue_allocator_allocate(snQueueAllocator *alloc, uint64_t si
 
         required_size += align_diff;
 
+        free_size = 0;
         if (((uint8_t *)new_head) < alloc->tail) free_size = SN_PTR_DIFF(alloc->tail, new_head);
     }
 
