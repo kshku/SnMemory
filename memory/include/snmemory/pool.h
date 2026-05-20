@@ -13,15 +13,15 @@
  * - None of the sn_pool_allocator* functions are thread-safe
  */
 typedef struct snPoolAllocator {
-    uint8_t *mem;        /**< Base memory pointer */
-    uint64_t size;       /**< Total size of memory */
+    uint8_t *mem; /**< Base memory pointer */
+    uint64_t size; /**< Total size of memory */
 
     uint64_t block_size; /**< Size of each block */
-    uint64_t block_align;/**< Alignment of each block */
+    uint64_t block_align; /**< Alignment of each block */
 
-    void *free_list;     /**< Head of free block list */
+    void *free_list; /**< Head of free block list */
 
-    uint64_t block_count;/**< Total number of blocks */
+    uint64_t block_count; /**< Total number of blocks */
     uint64_t free_count; /**< Number of free blocks */
 } snPoolAllocator;
 
@@ -36,7 +36,8 @@ typedef struct snPoolAllocator {
  *
  * @return true on success, false on failure
  */
-SN_INLINE bool sn_pool_allocator_init(snPoolAllocator *alloc, void *mem, uint64_t size, uint64_t block_size, uint64_t block_align) {
+SN_INLINE bool sn_pool_allocator_init(
+    snPoolAllocator *alloc, void *mem, uint64_t size, uint64_t block_size, uint64_t block_align) {
     if (!alloc || !mem || !size) return false;
 
     block_size = SN_GET_ALIGNED(block_size, block_align);

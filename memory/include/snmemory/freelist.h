@@ -1,8 +1,7 @@
 #pragma once
 
-#include "snmemory/defines.h"
-
 #include "snmemory/api.h"
+#include "snmemory/defines.h"
 
 typedef struct snFreeNode {
     uint64_t size;
@@ -24,10 +23,10 @@ typedef struct snFreeNode {
  * - No OS allocations
  */
 typedef struct snFreeListAllocator {
-    uint8_t *mem;      /**< Base memory pointer */
-    uint64_t size;     /**< Total size of managed memory */
+    uint8_t *mem; /**< Base memory pointer */
+    uint64_t size; /**< Total size of managed memory */
 
-    snFreeNode *free_list;   /**< Head of free block list */
+    snFreeNode *free_list; /**< Head of free block list */
 } snFreeListAllocator;
 
 /**
@@ -51,10 +50,8 @@ SN_INLINE bool sn_freelist_allocator_init(snFreeListAllocator *alloc, void *mem,
         .free_list = SN_GET_ALIGNED_PTR(mem, snFreeNode),
     };
 
-    *alloc->free_list = (snFreeNode) {
-        .size = SN_PTR_DIFF(((uint8_t *)mem) + size, alloc->free_list + 1),
-        .next = NULL
-    };
+    *alloc->free_list
+        = (snFreeNode){.size = SN_PTR_DIFF(((uint8_t *)mem) + size, alloc->free_list + 1), .next = NULL};
 
     return true;
 }
@@ -105,7 +102,8 @@ SN_API void sn_freelist_allocator_free(snFreeListAllocator *alloc, void *ptr);
  * @note
  * - ptr must be returned by this allocator
  */
-SN_API void *sn_freelist_allocator_reallocate(snFreeListAllocator *alloc, void *ptr, uint64_t new_size, uint64_t align);
+SN_API void *sn_freelist_allocator_reallocate(
+    snFreeListAllocator *alloc, void *ptr, uint64_t new_size, uint64_t align);
 
 /**
  * @brief Get total managed memory size.

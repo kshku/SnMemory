@@ -33,11 +33,7 @@ typedef struct snStackAllocator {
 SN_FORCE_INLINE bool sn_stack_allocator_init(snStackAllocator *alloc, void *mem, uint64_t size) {
     if (!alloc || !mem || !size) return false;
 
-    *alloc = (snStackAllocator){
-        .mem = (uint8_t *)mem,
-        .top = (uint8_t *)mem,
-        .size = size
-    };
+    *alloc = (snStackAllocator){.mem = (uint8_t *)mem, .top = (uint8_t *)mem, .size = size};
 
     return true;
 }
@@ -69,7 +65,9 @@ SN_INLINE void *sn_stack_allocator_allocate(snStackAllocator *alloc, uint64_t si
 
     uint8_t *aligned = (uint8_t *)SN_GET_ALIGNED(alloc->top, align);
 
-    if (aligned + size + sizeof(snStackAllocatorFooter) + alignof(snStackAllocatorFooter) > alloc->mem + alloc->size) return NULL;
+    if (aligned + size + sizeof(snStackAllocatorFooter) + alignof(snStackAllocatorFooter)
+        > alloc->mem + alloc->size)
+        return NULL;
 
     snStackAllocatorFooter *footer = SN_GET_ALIGNED_PTR(aligned + size, snStackAllocatorFooter);
     footer->previous_top = alloc->top;

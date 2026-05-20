@@ -2,12 +2,11 @@
 
 #if defined(SN_OS_LINUX) || defined(SN_OS_MAC)
 
-#include <sys/mman.h>
-#include <unistd.h>
+    #include <sys/mman.h>
+    #include <unistd.h>
 
 void *sn_vm_reserve(uint32_t pages) {
-    void *ptr = mmap(NULL, pages * sn_vm_get_page_size(),
-            PROT_NONE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    void *ptr = mmap(NULL, pages * sn_vm_get_page_size(), PROT_NONE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
     if (ptr == MAP_FAILED) return NULL;
 
     return ptr;

@@ -99,7 +99,7 @@ void *sn_freelist_allocator_reallocate(snFreeListAllocator *alloc, void *ptr, ui
     }
 
     // Try to extend
-    if (freenode ==(snFreeNode *)NODE_END(node)) { // We have a freenode right next to this node
+    if (freenode == (snFreeNode *)NODE_END(node)) {  // We have a freenode right next to this node
         // Merge both nodes
         node->size += sizeof(snFreeNode) + freenode->size;
 
@@ -122,7 +122,7 @@ alloc_copy_free:;
     memcpy(new_ptr, ptr, SN_MIN(new_size, current_size));
 
     sn_freelist_allocator_free(alloc, ptr);
-    
+
     return new_ptr;
 }
 
@@ -169,7 +169,7 @@ static uint64_t read_from_bytes(void *bytes, bool reverse) {
         p += inc;
     }
 
-    value |= (uint64_t)*p  << i;
+    value |= (uint64_t)*p << i;
 
     return value;
 }
@@ -199,18 +199,12 @@ static void try_merge(snFreeNode *previous_node, snFreeNode *node) {
 }
 
 static void split_node_if_possible(snFreeNode *node, uint64_t allocated_size) {
-    if (node->size - allocated_size < SPLITTING_THRESHOLD) return; // Not enough space to split
+    if (node->size - allocated_size < SPLITTING_THRESHOLD) return;  // Not enough space to split
 
     snFreeNode *new_node = SN_GET_ALIGNED_PTR(((uint8_t *)(node + 1)) + allocated_size, snFreeNode);
 
-    *new_node = (snFreeNode){
-        .next = node->next,
-        .size = SN_PTR_DIFF(NODE_END(node), new_node + 1)
-    };
+    *new_node = (snFreeNode){.next = node->next, .size = SN_PTR_DIFF(NODE_END(node), new_node + 1)};
 
-    *node = (snFreeNode){
-        .next = new_node,
-        .size = SN_PTR_DIFF(new_node, node + 1)
-    };
+    *node = (snFreeNode){.next = new_node, .size = SN_PTR_DIFF(new_node, node + 1)};
 }
 

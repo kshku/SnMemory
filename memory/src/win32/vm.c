@@ -2,7 +2,7 @@
 
 #if defined(SN_OS_WINDOWS)
 
-#include <windows.h>
+    #include <windows.h>
 
 void *sn_vm_reserve(uint32_t pages) {
     return VirtualAlloc(NULL, pages * sn_vm_get_page_size(), MEM_RESERVE, PAGE_NOACCESS);

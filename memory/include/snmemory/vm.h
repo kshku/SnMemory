@@ -1,8 +1,7 @@
 #pragma once
 
-#include "snmemory/defines.h"
-
 #include "snmemory/api.h"
+#include "snmemory/defines.h"
 
 /**
  * @brief Reserve address space.

@@ -1,20 +1,20 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
 #include <assert.h>
-#include <stdlib.h>
-#include <time.h>
-
 #include <snmemory/defines.h>
 #include <snmemory/snmemory.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
-#define TEST_ASSERT(x) do { \
-    if (!(x)) { \
-        fprintf(stderr, "ASSERT FAILED: %s in function %s(%s:%d)\n", #x, __func__, __FILE__, __LINE__); \
-        __asm__ volatile("int $3"); \
-    } \
-} while (0)
+#define TEST_ASSERT(x)                                                                                      \
+    do {                                                                                                    \
+        if (!(x)) {                                                                                         \
+            fprintf(stderr, "ASSERT FAILED: %s in function %s(%s:%d)\n", #x, __func__, __FILE__, __LINE__); \
+            __asm__ volatile("int $3");                                                                     \
+        }                                                                                                   \
+    } while (0)
 
 #define KB(x) ((x) * 1024ULL)
 #define MB(x) ((x) * 1024ULL * 1024ULL)
@@ -25,14 +25,12 @@ static uint64_t rand_range(uint64_t min, uint64_t max) {
 
 static void fill_pattern(void *ptr, size_t size, uint8_t seed) {
     uint8_t *p = ptr;
-    for (size_t i = 0; i < size; i++)
-        p[i] = (uint8_t)(seed + i);
+    for (size_t i = 0; i < size; i++) p[i] = (uint8_t)(seed + i);
 }
 
 static void verify_pattern(void *ptr, size_t size, uint8_t seed) {
     uint8_t *p = ptr;
-    for (size_t i = 0; i < size; i++)
-        TEST_ASSERT(p[i] == (uint8_t)(seed + i));
+    for (size_t i = 0; i < size; i++) TEST_ASSERT(p[i] == (uint8_t)(seed + i));
 }
 
 static void test_linear_allocator(void) {
@@ -99,9 +97,7 @@ static void test_pool_allocator(void) {
     uint8_t buffer[KB(4)];
     snPoolAllocator alloc;
 
-    TEST_ASSERT(
-        sn_pool_allocator_init(&alloc, buffer, sizeof(buffer), 64, 8)
-    );
+    TEST_ASSERT(sn_pool_allocator_init(&alloc, buffer, sizeof(buffer), 64, 8));
 
     uint64_t total = sn_pool_allocator_get_block_count(&alloc);
     TEST_ASSERT(total > 0);
@@ -213,8 +209,8 @@ static void test_linear_allocator_exhaustion(void) {
 
     uint64_t used = 0;
     while (true) {
-        uint64_t size  = rand_range(1, 64);
-        uint64_t align = 1ULL << rand_range(0, 5); // 1..32
+        uint64_t size = rand_range(1, 64);
+        uint64_t align = 1ULL << rand_range(0, 5);  // 1..32
 
         void *p = sn_linear_allocator_allocate(&alloc, size, align);
         if (!p) break;
@@ -275,12 +271,12 @@ static void test_stack_allocator_alignment_stress(void) {
     int success_count = 0;
 
     for (int i = 0; i < 200; i++) {
-        uint64_t align = 1ULL << rand_range(0, 6); // 1..64
-        uint64_t size  = rand_range(1, 64);
+        uint64_t align = 1ULL << rand_range(0, 6);  // 1..64
+        uint64_t size = rand_range(1, 64);
 
         void *p = sn_stack_allocator_allocate(&alloc, size, align);
         if (!p) {
-            break; // expected when memory runs out
+            break;  // expected when memory runs out
         }
 
         TEST_ASSERT(SN_IS_ALIGNED(p, align));
@@ -302,7 +298,7 @@ static void test_pool_allocator_random_free(void) {
     sn_pool_allocator_init(&alloc, buffer, sizeof(buffer), 64, 8);
 
     uint64_t n = sn_pool_allocator_get_block_count(&alloc);
-    void **ptrs = malloc(n * sizeof(void*));
+    void **ptrs = malloc(n * sizeof(void *));
 
     for (uint64_t i = 0; i < n; i++) {
         ptrs[i] = sn_pool_allocator_allocate(&alloc);
@@ -335,14 +331,9 @@ static void test_freelist_fragmentation(void) {
     int alloc_count = 0;
 
     for (int i = 0; i < 256; i++) {
-        ptrs[i] = sn_freelist_allocator_allocate(
-            &alloc,
-            rand_range(8, 256),
-            1ULL << rand_range(0, 5)
-        );
+        ptrs[i] = sn_freelist_allocator_allocate(&alloc, rand_range(8, 256), 1ULL << rand_range(0, 5));
 
-        if (!ptrs[i])
-            break;
+        if (!ptrs[i]) break;
 
         alloc_count++;
     }
@@ -359,8 +350,7 @@ static void test_freelist_fragmentation(void) {
     int reuse_count = 0;
     for (int i = 0; i < alloc_count / 2; i++) {
         void *p = sn_freelist_allocator_allocate(&alloc, 64, 8);
-        if (!p)
-            break;
+        if (!p) break;
 
         TEST_ASSERT(SN_IS_ALIGNED(p, 8));
         reuse_count++;
@@ -387,7 +377,8 @@ static void test_freelist_realloc_loop(void) {
         uint64_t new_size = rand_range(16, 512);
         p = sn_freelist_allocator_reallocate(&alloc, p, new_size, 8);
         TEST_ASSERT(p);
-        if (new_size < min_size) min_size = new_size; // only upto min_size guarantted to retain the content.
+        if (new_size < min_size)
+            min_size = new_size;  // only upto min_size guarantted to retain the content.
         verify_pattern(p, SN_MIN(min_size, new_size), 0x42);
     }
 
@@ -413,7 +404,7 @@ static void test_freelist_full_reuse(void) {
     }
 
     uint64_t free_size = sn_freelist_allocator_get_free_size(&alloc);
-    TEST_ASSERT(free_size >= KB(15)); // Almost entire buffer
+    TEST_ASSERT(free_size >= KB(15));  // Almost entire buffer
 }
 
 static void test_vm_basic(void) {
@@ -493,7 +484,6 @@ static void test_queue_allocator_basic(void) {
     sn_queue_allocator_deinit(&alloc);
 }
 
-
 static void test_queue_allocator_fifo(void) {
     uint8_t buffer[2048];
     snQueueAllocator alloc;
@@ -514,7 +504,6 @@ static void test_queue_allocator_fifo(void) {
 
     TEST_ASSERT(sn_queue_allocator_get_allocated_size(&alloc) == 0);
 }
-
 
 static void test_queue_allocator_wrap(void) {
     uint8_t buffer[512];
@@ -543,7 +532,6 @@ static void test_queue_allocator_wrap(void) {
     TEST_ASSERT(sn_queue_allocator_get_allocated_size(&alloc) == 0);
 }
 
-
 static void test_queue_allocator_exhaustion(void) {
     uint8_t buffer[1024];
     snQueueAllocator alloc;
@@ -556,13 +544,12 @@ static void test_queue_allocator_exhaustion(void) {
     int count = 0;
 
     while (true) {
-        uint64_t size  = rand_range(8, 64);
+        uint64_t size = rand_range(8, 64);
         uint64_t align = 1ULL << rand_range(0, 5);
 
         void *p = sn_queue_allocator_allocate(&alloc, size, align);
 
-        if (!p)
-            break;
+        if (!p) break;
 
         TEST_ASSERT(SN_IS_ALIGNED(p, align));
 
@@ -586,8 +573,7 @@ static void test_queue_allocator_exhaustion(void) {
 
 #define TRACK_CAP 256
 
-static void test_queue_allocator_random_stress(void)
-{
+static void test_queue_allocator_random_stress(void) {
     uint8_t buffer[KB(8)];
     snQueueAllocator alloc;
 
@@ -602,26 +588,21 @@ static void test_queue_allocator_random_stress(void)
     uint32_t count = 0;
     uint8_t next_seed = 1;
 
-    for (int i = 0; i < 1000; i++)
-    {
-        bool do_alloc =
-            (count == 0) ||
-            (rand_range(0,1) == 0 && count < TRACK_CAP);
+    for (int i = 0; i < 1000; i++) {
+        bool do_alloc = (count == 0) || (rand_range(0, 1) == 0 && count < TRACK_CAP);
 
-        if (do_alloc)
-        {
-            uint64_t size  = rand_range(8,128);
-            uint64_t align = 1ULL << rand_range(0,5);
+        if (do_alloc) {
+            uint64_t size = rand_range(8, 128);
+            uint64_t align = 1ULL << rand_range(0, 5);
 
             void *p = sn_queue_allocator_allocate(&alloc, size, align);
 
-            if (p)
-            {
+            if (p) {
                 TEST_ASSERT(SN_IS_ALIGNED(p, align));
 
                 fill_pattern(p, size, next_seed);
 
-                ptrs[head]  = p;
+                ptrs[head] = p;
                 sizes[head] = size;
                 seeds[head] = next_seed;
 
@@ -630,9 +611,7 @@ static void test_queue_allocator_random_stress(void)
                 head = (head + 1) % TRACK_CAP;
                 count++;
             }
-        }
-        else
-        {
+        } else {
             verify_pattern(ptrs[tail], sizes[tail], seeds[tail]);
 
             sn_queue_allocator_free(&alloc, ptrs[tail]);
@@ -642,8 +621,7 @@ static void test_queue_allocator_random_stress(void)
         }
     }
 
-    while (count > 0)
-    {
+    while (count > 0) {
         verify_pattern(ptrs[tail], sizes[tail], seeds[tail]);
 
         sn_queue_allocator_free(&alloc, ptrs[tail]);
@@ -652,9 +630,7 @@ static void test_queue_allocator_random_stress(void)
         count--;
     }
 
-    TEST_ASSERT(
-        sn_queue_allocator_get_allocated_size(&alloc) == 0
-    );
+    TEST_ASSERT(sn_queue_allocator_get_allocated_size(&alloc) == 0);
 }
 
 int main(void) {
@@ -731,7 +707,6 @@ int main(void) {
         test_vm_basic();
 
         printf("VM tests passed ✅\n\n");
-
     }
 
     printf("ALL ALLOCATOR TESTS PASSED %d times ✅✅✅\n", n);

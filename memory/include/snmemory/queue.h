@@ -36,12 +36,7 @@ SN_FORCE_INLINE bool sn_queue_allocator_init(snQueueAllocator *alloc, void *mem,
 
     if (size < sizeof(snQueueAllocatorHeader) * 2) return false;
 
-    *alloc = (snQueueAllocator){
-        .mem = (uint8_t *)mem,
-        .head = NULL,
-        .tail = NULL,
-        .size = size
-    };
+    *alloc = (snQueueAllocator){.mem = (uint8_t *)mem, .head = NULL, .tail = NULL, .size = size};
 
     return true;
 }
@@ -73,7 +68,7 @@ SN_INLINE void *sn_queue_allocator_allocate(snQueueAllocator *alloc, uint64_t si
 
     snQueueAllocatorHeader *head_header = (snQueueAllocatorHeader *)alloc->head;
     uint8_t *mem_end = alloc->mem + alloc->size;
-    
+
     uint8_t *raw_head = alloc->head ? head_header->next : alloc->mem;
     snQueueAllocatorHeader *new_head = SN_GET_ALIGNED_PTR(raw_head, snQueueAllocatorHeader);
 
@@ -84,8 +79,10 @@ SN_INLINE void *sn_queue_allocator_allocate(snQueueAllocator *alloc, uint64_t si
 
     uint64_t free_size = 0;
     if ((uint8_t *)new_head < mem_end) {
-        if (!alloc->tail || alloc->tail < (uint8_t *)new_head) free_size = SN_PTR_DIFF(mem_end, new_head);
-        else if (((uint8_t *)new_head) < alloc->tail) free_size = SN_PTR_DIFF(alloc->tail, new_head);
+        if (!alloc->tail || alloc->tail < (uint8_t *)new_head)
+            free_size = SN_PTR_DIFF(mem_end, new_head);
+        else if (((uint8_t *)new_head) < alloc->tail)
+            free_size = SN_PTR_DIFF(alloc->tail, new_head);
     }
 
     // Wrapping
@@ -112,10 +109,7 @@ SN_INLINE void *sn_queue_allocator_allocate(snQueueAllocator *alloc, uint64_t si
         alloc->tail = (uint8_t *)new_head;
     }
 
-    *new_head = (snQueueAllocatorHeader){
-        .next = ((uint8_t *)aligned) + size,
-        .align_diff = align_diff
-    };
+    *new_head = (snQueueAllocatorHeader){.next = ((uint8_t *)aligned) + size, .align_diff = align_diff};
 
     if ((uint8_t *)new_head < alloc->tail) SN_ASSERT(new_head->next <= alloc->tail);
 
@@ -200,5 +194,4 @@ SN_FORCE_INLINE uint64_t sn_queue_allocator_get_remaining_size(snQueueAllocator 
 
     return size;
 }
-
 
