@@ -126,6 +126,54 @@ alloc_copy_free:;
     return new_ptr;
 }
 
+void sn_freelist_allocator_increase_memory_size(snFreeListAllocator *alloc, void *mem, uint64_t size) {
+    if (!alloc || size < sizeof(snFreeNode) + SN_FREELIST_SPLITTING_THRESHOLD) return;
+
+    SN_ASSERT(alloc->mem + alloc->size == mem);
+    alloc->size += size;
+
+    if (!alloc->free_list) {
+        // No free nodes
+        alloc->free_list = SN_GET_ALIGNED_PTR(mem, snFreeNode);
+        // TODO: Should this fail?
+        SN_ASSERT(alloc->free_list == mem);  // otherwise allocator will have fragmentation
+        *alloc->free_list = (snFreeNode){
+            .size = SN_PTR_DIFF(((uint8_t *)mem) + size, alloc->free_list + 1),
+            .next = NULL,
+        };
+        return;
+    }
+
+    // We have free nodes, find the one which has its end right before the added memory
+    snFreeNode *cur_node = alloc->free_list;
+    snFreeNode *last_node = NULL;
+    while (cur_node) {
+        if (NODE_END(cur_node) == (uint8_t *)mem) {
+            // This will always be the last node in the list
+            SN_ASSERT(cur_node->next == NULL);
+            // We found it, just add the size
+            cur_node->size += size;
+            return;
+        }
+
+        last_node = cur_node;
+        cur_node = cur_node->next;
+    }
+
+    // We didn't found free node right before added memory,
+    // create a new node after the last node in the list
+    SN_ASSERT(last_node->next == NULL);
+
+    snFreeNode *new_node = SN_GET_ALIGNED_PTR(mem, snFreeNode);
+    // TODO: Should this fail?
+    SN_ASSERT(new_node == mem);  // otherwise allocator will have fragmentation
+    *new_node = (snFreeNode){
+        .size = SN_PTR_DIFF(((uint8_t *)mem) + size, new_node + 1),
+        .next = NULL,
+    };
+    last_node->next = new_node;
+}
+
 static snFreeNode *first_fit(snFreeNode *freenode, uint64_t size, snFreeNode **previous_freenode) {
     snFreeNode *previous = NULL;
 

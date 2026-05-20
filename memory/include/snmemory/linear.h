@@ -33,7 +33,11 @@ typedef uint8_t *snMemoryMark;
 SN_FORCE_INLINE bool sn_linear_allocator_init(snLinearAllocator *alloc, void *mem, uint64_t size) {
     if (!alloc || !mem || !size) return false;
 
-    *alloc = (snLinearAllocator){.mem = (uint8_t *)mem, .top = (uint8_t *)mem, .size = size};
+    *alloc = (snLinearAllocator){
+        .mem = (uint8_t *)mem,
+        .top = (uint8_t *)mem,
+        .size = size,
+    };
 
     return true;
 }
@@ -49,6 +53,20 @@ SN_FORCE_INLINE bool sn_linear_allocator_init(snLinearAllocator *alloc, void *me
 SN_FORCE_INLINE void sn_linear_allocator_deinit(snLinearAllocator *alloc) {
     if (!alloc) return;
     *alloc = (snLinearAllocator){0};
+}
+
+/**
+ * @brief Increase the size of memory managed by the allocator.
+ *
+ * @param alloc Pointer to the allocator context.
+ * @param mem Pointer to the new memory (must be right next to current memory).
+ * @param size Size of the new memory.
+ */
+SN_FORCE_INLINE void
+    sn_linear_allocator_increase_memory_size(snLinearAllocator *alloc, void *mem, uint64_t size) {
+    if (!alloc) return;
+    SN_ASSERT(alloc->mem + alloc->size == mem);
+    alloc->size += size;
 }
 
 /**

@@ -83,6 +83,44 @@ SN_FORCE_INLINE void sn_pool_allocator_deinit(snPoolAllocator *alloc) {
 }
 
 /**
+ * @brief Increase the size of memory managed by the allocator.
+ *
+ * @param alloc Pointer to the allocator context.
+ * @param mem Pointer to the new memory (must be right next to current memory).
+ * @param size Size of the new memory.
+ */
+SN_FORCE_INLINE void sn_pool_allocator_increase_memory_size(snPoolAllocator *alloc, void *mem, uint64_t size) {
+    if (!alloc || size < alloc->block_size) return;
+    SN_ASSERT(alloc->mem + alloc->size == mem);
+    alloc->size += size;
+
+    void *last_block = NULL;
+    void *freelist = alloc->free_list;
+    while (freelist) {
+        last_block = freelist;
+        freelist = *((void **)freelist);
+    }
+
+    freelist = (void *)SN_GET_ALIGNED(mem, alloc->block_align);
+    *((void **)last_block) = freelist;
+    *((void **)freelist) = NULL;
+
+    uint64_t block_count;
+    while (((uint64_t)freelist) + alloc->block_size <= ((uint64_t)mem) + size) {
+        void *next_block = (void *)(((uint64_t)freelist) + alloc->block_size);
+        block_count++;
+        *((void **)freelist) = next_block;
+        last_block = freelist;
+        freelist = next_block;
+    }
+
+    *((void **)last_block) = NULL;
+
+    alloc->block_count += block_count;
+    alloc->free_count += block_count;
+}
+
+/**
  * @brief Allocate a block from the pool.
  *
  * @param alloc Pointer to allocator context

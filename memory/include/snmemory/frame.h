@@ -52,6 +52,18 @@ SN_FORCE_INLINE void sn_frame_allocator_deinit(snFrameAllocator *alloc) {
 }
 
 /**
+ * @brief Increase the size of memory managed by the allocator.
+ *
+ * @param alloc Pointer to the allocator context.
+ * @param mem Pointer to the new memory (must be right next to current memory).
+ * @param size Size of the new memory.
+ */
+SN_FORCE_INLINE void sn_frame_allocator_increase_memory_size(snFrameAllocator *alloc, void *mem, uint64_t size) {
+    if (!alloc) return;
+    sn_linear_allocator_increase_memory_size(&alloc->arena, mem, size);
+}
+
+/**
  * @brief Begin a new frame.
  *
  * @param alloc Pointer to frame allocator

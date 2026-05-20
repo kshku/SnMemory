@@ -52,6 +52,19 @@ SN_FORCE_INLINE void sn_stack_allocator_deinit(snStackAllocator *alloc) {
 }
 
 /**
+ * @brief Increase the size of memory managed by the allocator.
+ *
+ * @param alloc Pointer to the allocator context.
+ * @param mem Pointer to the new memory (must be right next to current memory).
+ * @param size Size of the new memory.
+ */
+SN_FORCE_INLINE void sn_stack_allocator_increase_memory_size(snStackAllocator *alloc, void *mem, uint64_t size) {
+    if (!alloc) return;
+    SN_ASSERT(alloc->mem + alloc->size == mem);
+    alloc->size += size;
+}
+
+/**
  * @brief Allocate from the stack allocator.
  *
  * @param alloc Pointer to the allocator context.

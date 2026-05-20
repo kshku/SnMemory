@@ -50,8 +50,10 @@ SN_INLINE bool sn_freelist_allocator_init(snFreeListAllocator *alloc, void *mem,
         .free_list = SN_GET_ALIGNED_PTR(mem, snFreeNode),
     };
 
-    *alloc->free_list
-        = (snFreeNode){.size = SN_PTR_DIFF(((uint8_t *)mem) + size, alloc->free_list + 1), .next = NULL};
+    *alloc->free_list = (snFreeNode){
+        .size = SN_PTR_DIFF(((uint8_t *)mem) + size, alloc->free_list + 1),
+        .next = NULL,
+    };
 
     return true;
 }
@@ -67,6 +69,15 @@ SN_FORCE_INLINE void sn_freelist_allocator_deinit(snFreeListAllocator *alloc) {
     if (!alloc) return;
     *alloc = (snFreeListAllocator){0};
 }
+
+/**
+ * @brief Increase the size of memory managed by the allocator.
+ *
+ * @param alloc Pointer to the allocator context.
+ * @param mem Pointer to the new memory (must be right next to current memory).
+ * @param size Size of the new memory.
+ */
+void sn_freelist_allocator_increase_memory_size(snFreeListAllocator *alloc, void *mem, uint64_t size);
 
 /**
  * @brief Allocate memory from free-list allocator.
