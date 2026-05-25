@@ -99,7 +99,9 @@ void *sn_freelist_allocator_reallocate(snFreeListAllocator *alloc, void *ptr, ui
     }
 
     // Try to extend
-    if (freenode == (snFreeNode *)NODE_END(node)) {  // We have a freenode right next to this node
+    if (freenode == (snFreeNode *)NODE_END(node) && (node->size + freenode->size + sizeof(snFreeNode)) > new_size) {
+        // We have a freenode right next to this node
+
         // Merge both nodes
         node->size += sizeof(snFreeNode) + freenode->size;
 
