@@ -2,24 +2,24 @@
 
 #include <string.h>
 
-#define SPLITTING_THRESHOLD (sizeof(snFreeNode) + SN_FREELIST_SPLITTING_THRESHOLD)
+#define SPLITTING_THRESHOLD (sizeof(SnFreeNode) + SN_FREELIST_SPLITTING_THRESHOLD)
 
 #define NODE_END(node) (((uint8_t *)((node) + 1)) + (node)->size)
 #define PADDING_BYTE(ptr) ((void *)(((uint8_t *)ptr) - 1))
 
-static snFreeNode *first_fit(snFreeNode *freenode, uint64_t size, snFreeNode **previous_freenode);
+static SnFreeNode *first_fit(SnFreeNode *freenode, uint64_t size, SnFreeNode **previous_freenode);
 
 static void write_to_bytes(void *bytes, uint64_t value, bool reverse);
 
 static uint64_t read_from_bytes(void *bytes, bool reverse);
 
-static void try_merge(snFreeNode *previous_node, snFreeNode *node);
+static void try_merge(SnFreeNode *previous_node, SnFreeNode *node);
 
-static snFreeNode *get_previous_free_node(snFreeNode *freelist, snFreeNode *node);
+static SnFreeNode *get_previous_free_node(SnFreeNode *freelist, SnFreeNode *node);
 
-static void split_node_if_possible(snFreeNode *node, uint64_t allocated_size);
+static void split_node_if_possible(SnFreeNode *node, uint64_t allocated_size);
 
-void *sn_freelist_allocator_allocate(snFreeListAllocator *alloc, uint64_t size, uint64_t align) {
+void *sn_freelist_allocator_allocate(SnFreeListAllocator *alloc, uint64_t size, uint64_t align) {
     if (!size || !align || !alloc) return NULL;
 
     if (!alloc->free_list) return NULL;
@@ -27,8 +27,8 @@ void *sn_freelist_allocator_allocate(snFreeListAllocator *alloc, uint64_t size, 
     size = SN_GET_ALIGNED(size, align);
     size += align;
 
-    snFreeNode *previous_freenode = NULL;
-    snFreeNode *node = first_fit(alloc->free_list, size, &previous_freenode);
+    SnFreeNode *previous_freenode = NULL;
+    SnFreeNode *node = first_fit(alloc->free_list, size, &previous_freenode);
     if (!node) return NULL;
 
     // Get next aligned number (ensures we have padding before user pointer)
@@ -43,13 +43,13 @@ void *sn_freelist_allocator_allocate(snFreeListAllocator *alloc, uint64_t size, 
     return aligned;
 }
 
-void sn_freelist_allocator_free(snFreeListAllocator *alloc, void *ptr) {
+void sn_freelist_allocator_free(SnFreeListAllocator *alloc, void *ptr) {
     if (!ptr || !alloc) return;
 
     uint64_t diff_to_node = read_from_bytes(PADDING_BYTE(ptr), true);
-    snFreeNode *node = (snFreeNode *)(((uint8_t *)ptr) - diff_to_node);
+    SnFreeNode *node = (SnFreeNode *)(((uint8_t *)ptr) - diff_to_node);
 
-    snFreeNode *previous_freenode = get_previous_free_node(alloc->free_list, node);
+    SnFreeNode *previous_freenode = get_previous_free_node(alloc->free_list, node);
 
     if (!previous_freenode) {
         node->next = alloc->free_list;
@@ -63,18 +63,18 @@ void sn_freelist_allocator_free(snFreeListAllocator *alloc, void *ptr) {
     try_merge(previous_freenode, node);
 }
 
-void *sn_freelist_allocator_reallocate(snFreeListAllocator *alloc, void *ptr, uint64_t new_size, uint64_t align) {
+void *sn_freelist_allocator_reallocate(SnFreeListAllocator *alloc, void *ptr, uint64_t new_size, uint64_t align) {
     if (!ptr || !new_size || !align || !alloc) return NULL;
 
     uint64_t diff_to_node = read_from_bytes(PADDING_BYTE(ptr), true);
-    snFreeNode *node = (snFreeNode *)(((uint8_t *)ptr) - diff_to_node);
+    SnFreeNode *node = (SnFreeNode *)(((uint8_t *)ptr) - diff_to_node);
 
     uint64_t current_size = SN_PTR_DIFF(NODE_END(node), ptr);
 
     if (!SN_IS_ALIGNED(ptr, align)) goto alloc_copy_free;
 
-    snFreeNode *previous_freenode = NULL;
-    snFreeNode *freenode = alloc->free_list;
+    SnFreeNode *previous_freenode = NULL;
+    SnFreeNode *freenode = alloc->free_list;
     while (freenode) {
         if (freenode > node) break;
         previous_freenode = freenode;
@@ -99,11 +99,11 @@ void *sn_freelist_allocator_reallocate(snFreeListAllocator *alloc, void *ptr, ui
     }
 
     // Try to extend
-    if (freenode == (snFreeNode *)NODE_END(node) && (node->size + freenode->size + sizeof(snFreeNode)) > new_size) {
+    if (freenode == (SnFreeNode *)NODE_END(node) && (node->size + freenode->size + sizeof(SnFreeNode)) > new_size) {
         // We have a freenode right next to this node
 
         // Merge both nodes
-        node->size += sizeof(snFreeNode) + freenode->size;
+        node->size += sizeof(SnFreeNode) + freenode->size;
 
         // Fake this node as freenode and make it point to next freenode
         node->next = freenode->next;
@@ -128,18 +128,18 @@ alloc_copy_free:;
     return new_ptr;
 }
 
-void sn_freelist_allocator_increase_memory_size(snFreeListAllocator *alloc, void *mem, uint64_t size) {
-    if (!alloc || size < sizeof(snFreeNode) + SN_FREELIST_SPLITTING_THRESHOLD) return;
+void sn_freelist_allocator_increase_memory_size(SnFreeListAllocator *alloc, void *mem, uint64_t size) {
+    if (!alloc || size < sizeof(SnFreeNode) + SN_FREELIST_SPLITTING_THRESHOLD) return;
 
     SN_ASSERT(alloc->mem + alloc->size == mem);
     alloc->size += size;
 
     if (!alloc->free_list) {
         // No free nodes
-        alloc->free_list = SN_GET_ALIGNED_PTR(mem, snFreeNode);
+        alloc->free_list = SN_GET_ALIGNED_PTR(mem, SnFreeNode);
         // TODO: Should this fail?
         SN_ASSERT(alloc->free_list == mem);  // otherwise allocator will have fragmentation
-        *alloc->free_list = (snFreeNode){
+        *alloc->free_list = (SnFreeNode){
             .size = SN_PTR_DIFF(((uint8_t *)mem) + size, alloc->free_list + 1),
             .next = NULL,
         };
@@ -147,8 +147,8 @@ void sn_freelist_allocator_increase_memory_size(snFreeListAllocator *alloc, void
     }
 
     // We have free nodes, find the one which has its end right before the added memory
-    snFreeNode *cur_node = alloc->free_list;
-    snFreeNode *last_node = NULL;
+    SnFreeNode *cur_node = alloc->free_list;
+    SnFreeNode *last_node = NULL;
     while (cur_node) {
         if (NODE_END(cur_node) == (uint8_t *)mem) {
             // This will always be the last node in the list
@@ -166,18 +166,18 @@ void sn_freelist_allocator_increase_memory_size(snFreeListAllocator *alloc, void
     // create a new node after the last node in the list
     SN_ASSERT(last_node->next == NULL);
 
-    snFreeNode *new_node = SN_GET_ALIGNED_PTR(mem, snFreeNode);
+    SnFreeNode *new_node = SN_GET_ALIGNED_PTR(mem, SnFreeNode);
     // TODO: Should this fail?
     SN_ASSERT(new_node == mem);  // otherwise allocator will have fragmentation
-    *new_node = (snFreeNode){
+    *new_node = (SnFreeNode){
         .size = SN_PTR_DIFF(((uint8_t *)mem) + size, new_node + 1),
         .next = NULL,
     };
     last_node->next = new_node;
 }
 
-static snFreeNode *first_fit(snFreeNode *freenode, uint64_t size, snFreeNode **previous_freenode) {
-    snFreeNode *previous = NULL;
+static SnFreeNode *first_fit(SnFreeNode *freenode, uint64_t size, SnFreeNode **previous_freenode) {
+    SnFreeNode *previous = NULL;
 
     while (freenode) {
         if (freenode->size >= size) {
@@ -224,8 +224,8 @@ static uint64_t read_from_bytes(void *bytes, bool reverse) {
     return value;
 }
 
-static snFreeNode *get_previous_free_node(snFreeNode *freelist, snFreeNode *node) {
-    snFreeNode *previous_node = NULL;
+static SnFreeNode *get_previous_free_node(SnFreeNode *freelist, SnFreeNode *node) {
+    SnFreeNode *previous_node = NULL;
     while (freelist) {
         if (freelist > node) break;
         previous_node = freelist;
@@ -235,26 +235,26 @@ static snFreeNode *get_previous_free_node(snFreeNode *freelist, snFreeNode *node
     return previous_node;
 }
 
-static void try_merge(snFreeNode *previous_node, snFreeNode *node) {
+static void try_merge(SnFreeNode *previous_node, SnFreeNode *node) {
     // Previous node is never NULL, node can be NULL
     if (NODE_END(previous_node) == ((uint8_t *)node)) {
-        previous_node->size += sizeof(snFreeNode) + node->size;
+        previous_node->size += sizeof(SnFreeNode) + node->size;
         previous_node->next = node->next;
 
         try_merge(previous_node, previous_node->next);
     } else if (node && NODE_END(node) == (uint8_t *)node->next) {
-        node->size += sizeof(snFreeNode) + node->next->size;
+        node->size += sizeof(SnFreeNode) + node->next->size;
         node->next = node->next->next;
     }
 }
 
-static void split_node_if_possible(snFreeNode *node, uint64_t allocated_size) {
+static void split_node_if_possible(SnFreeNode *node, uint64_t allocated_size) {
     if (node->size - allocated_size < SPLITTING_THRESHOLD) return;  // Not enough space to split
 
-    snFreeNode *new_node = SN_GET_ALIGNED_PTR(((uint8_t *)(node + 1)) + allocated_size, snFreeNode);
+    SnFreeNode *new_node = SN_GET_ALIGNED_PTR(((uint8_t *)(node + 1)) + allocated_size, SnFreeNode);
 
-    *new_node = (snFreeNode){.next = node->next, .size = SN_PTR_DIFF(NODE_END(node), new_node + 1)};
+    *new_node = (SnFreeNode){.next = node->next, .size = SN_PTR_DIFF(NODE_END(node), new_node + 1)};
 
-    *node = (snFreeNode){.next = new_node, .size = SN_PTR_DIFF(new_node, node + 1)};
+    *node = (SnFreeNode){.next = new_node, .size = SN_PTR_DIFF(new_node, node + 1)};
 }
 

@@ -55,31 +55,31 @@ static void verify_pattern(void *ptr, size_t size, uint8_t seed) {
     for (size_t i = 0; i < size; i++) TEST_ASSERT(p[i] == (uint8_t)(seed + i));
 }
 
-static void check_linear(snLinearAllocator *a, uint64_t total) {
+static void check_linear(SnLinearAllocator *a, uint64_t total) {
     check_accounting(sn_linear_allocator_get_allocated_size(a), sn_linear_allocator_get_remaining_size(a), total);
 }
 
-static void check_stack(snStackAllocator *a, uint64_t total) {
+static void check_stack(SnStackAllocator *a, uint64_t total) {
     check_accounting(sn_stack_allocator_get_allocated_size(a), sn_stack_allocator_get_remaining_size(a), total);
 }
 
-static void check_queue(snQueueAllocator *a, uint64_t total) {
+static void check_queue(SnQueueAllocator *a, uint64_t total) {
     check_accounting(sn_queue_allocator_get_allocated_size(a), sn_queue_allocator_get_remaining_size(a), total);
 }
 
-static void check_freelist(snFreeListAllocator *a, uint64_t total) {
+static void check_freelist(SnFreeListAllocator *a, uint64_t total) {
     uint64_t free_size = sn_freelist_allocator_get_free_size(a);
 
     check_accounting(total - free_size, free_size, total);
 }
 
-static void check_frame(snFrameAllocator *a, uint64_t total) {
+static void check_frame(SnFrameAllocator *a, uint64_t total) {
     uint64_t used = sn_frame_allocator_get_frame_usage(a);
 
     check_accounting(used, total - used, total);
 }
 
-static void check_pool(snPoolAllocator *a) {
+static void check_pool(SnPoolAllocator *a) {
     uint64_t total = sn_pool_allocator_get_block_count(a);
     uint64_t free = sn_pool_allocator_get_free_count(a);
 
@@ -91,7 +91,7 @@ static void check_pool(snPoolAllocator *a) {
 
 static void test_linear_allocator(void) {
     uint8_t buffer[KB(4)];
-    snLinearAllocator alloc;
+    SnLinearAllocator alloc;
 
     TEST_ASSERT(sn_linear_allocator_init(&alloc, buffer, sizeof(buffer)));
 
@@ -128,7 +128,7 @@ static void test_linear_allocator(void) {
 
 static void test_linear_allocator_exhaustion(void) {
     uint8_t buffer[1024];
-    snLinearAllocator alloc;
+    SnLinearAllocator alloc;
 
     TEST_ASSERT(sn_linear_allocator_init(&alloc, buffer, sizeof(buffer)));
 
@@ -150,7 +150,7 @@ static void test_linear_allocator_exhaustion(void) {
 
 static void test_linear_allocator_marks(void) {
     uint8_t buffer[2048];
-    snLinearAllocator alloc;
+    SnLinearAllocator alloc;
 
     sn_linear_allocator_init(&alloc, buffer, sizeof(buffer));
 
@@ -176,7 +176,7 @@ static void test_linear_allocator_marks(void) {
 
 static void test_stack_allocator(void) {
     uint8_t buffer[KB(4)];
-    snStackAllocator alloc;
+    SnStackAllocator alloc;
 
     TEST_ASSERT(sn_stack_allocator_init(&alloc, buffer, sizeof(buffer)));
 
@@ -207,7 +207,7 @@ static void test_stack_allocator(void) {
 
 static void test_stack_allocator_lifo(void) {
     uint8_t buffer[2048 + 16];
-    snStackAllocator alloc;
+    SnStackAllocator alloc;
 
     sn_stack_allocator_init(&alloc, buffer, sizeof(buffer));
 
@@ -230,7 +230,7 @@ static void test_stack_allocator_lifo(void) {
 
 static void test_stack_allocator_alignment_stress(void) {
     uint8_t buffer[8192];
-    snStackAllocator alloc;
+    SnStackAllocator alloc;
 
     TEST_ASSERT(sn_stack_allocator_init(&alloc, buffer, sizeof(buffer)));
 
@@ -259,7 +259,7 @@ static void test_stack_allocator_alignment_stress(void) {
 
 static void test_pool_allocator(void) {
     uint8_t buffer[KB(4)];
-    snPoolAllocator alloc;
+    SnPoolAllocator alloc;
 
     TEST_ASSERT(sn_pool_allocator_init(&alloc, buffer, sizeof(buffer), 64, 8));
 
@@ -288,7 +288,7 @@ static void test_pool_allocator(void) {
 
 static void test_pool_allocator_random_free(void) {
     uint8_t buffer[4096];
-    snPoolAllocator alloc;
+    SnPoolAllocator alloc;
 
     sn_pool_allocator_init(&alloc, buffer, sizeof(buffer), 64, 8);
 
@@ -326,7 +326,7 @@ static void test_pool_allocator_random_free(void) {
 
 static void test_frame_allocator(void) {
     uint8_t buffer[KB(8)];
-    snFrameAllocator alloc;
+    SnFrameAllocator alloc;
 
     TEST_ASSERT(sn_frame_allocator_init(&alloc, buffer, sizeof(buffer)));
 
@@ -349,7 +349,7 @@ static void test_frame_allocator(void) {
 
 static void test_freelist_allocator_basic(void) {
     uint8_t buffer[KB(16)];
-    snFreeListAllocator alloc;
+    SnFreeListAllocator alloc;
 
     TEST_ASSERT(sn_freelist_allocator_init(&alloc, buffer, sizeof(buffer)));
 
@@ -370,7 +370,7 @@ static void test_freelist_allocator_basic(void) {
 
 static void test_freelist_allocator_realloc(void) {
     uint8_t buffer[KB(16)];
-    snFreeListAllocator alloc;
+    SnFreeListAllocator alloc;
 
     sn_freelist_allocator_init(&alloc, buffer, sizeof(buffer));
 
@@ -393,7 +393,7 @@ static void test_freelist_allocator_realloc(void) {
 
 static void test_freelist_fragmentation(void) {
     uint8_t buffer[KB(48)];
-    snFreeListAllocator alloc;
+    SnFreeListAllocator alloc;
 
     sn_freelist_allocator_init(&alloc, buffer, sizeof(buffer));
 
@@ -420,7 +420,7 @@ static void test_freelist_fragmentation(void) {
 
 static void test_freelist_full_reuse(void) {
     uint8_t buffer[KB(16)];
-    snFreeListAllocator alloc;
+    SnFreeListAllocator alloc;
 
     sn_freelist_allocator_init(&alloc, buffer, sizeof(buffer));
 
@@ -446,7 +446,7 @@ static void test_freelist_full_reuse(void) {
 
 static void test_queue_allocator_basic(void) {
     uint8_t buffer[KB(4)];
-    snQueueAllocator alloc;
+    SnQueueAllocator alloc;
 
     sn_queue_allocator_init(&alloc, buffer, sizeof(buffer));
 
@@ -471,7 +471,7 @@ static void test_queue_allocator_basic(void) {
 
 static void test_queue_allocator_wrap(void) {
     uint8_t buffer[512];
-    snQueueAllocator alloc;
+    SnQueueAllocator alloc;
 
     sn_queue_allocator_init(&alloc, buffer, sizeof(buffer));
 
@@ -502,7 +502,7 @@ static void test_queue_allocator_wrap(void) {
 
 static void test_queue_allocator_random_stress(void) {
     uint8_t buffer[KB(8)];
-    snQueueAllocator alloc;
+    SnQueueAllocator alloc;
 
     sn_queue_allocator_init(&alloc, buffer, sizeof(buffer));
 

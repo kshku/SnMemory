@@ -3,7 +3,7 @@
 #include "snmemory/defines.h"
 
 /**
- * @struct snPoolAllocator
+ * @struct SnPoolAllocator
  * @brief Fixed-size block memory allocator.
  *
  * Manages a user-provided memory buffer divided into equal-sized blocks.
@@ -12,7 +12,7 @@
  * - Block size must be >= sizeof(void *)
  * - None of the sn_pool_allocator* functions are thread-safe
  */
-typedef struct snPoolAllocator {
+typedef struct SnPoolAllocator {
     uint8_t *mem; /**< Base memory pointer */
     uint64_t size; /**< Total size of memory */
 
@@ -23,7 +23,7 @@ typedef struct snPoolAllocator {
 
     uint64_t block_count; /**< Total number of blocks */
     uint64_t free_count; /**< Number of free blocks */
-} snPoolAllocator;
+} SnPoolAllocator;
 
 /**
  * @brief Initialize a pool allocator.
@@ -37,14 +37,14 @@ typedef struct snPoolAllocator {
  * @return true on success, false on failure
  */
 SN_INLINE bool sn_pool_allocator_init(
-    snPoolAllocator *alloc, void *mem, uint64_t size, uint64_t block_size, uint64_t block_align) {
+    SnPoolAllocator *alloc, void *mem, uint64_t size, uint64_t block_size, uint64_t block_align) {
     if (!alloc || !mem || !size) return false;
 
     block_size = SN_GET_ALIGNED(block_size, block_align);
 
     if (block_size < sizeof(void *)) return false;
 
-    *alloc = (snPoolAllocator){
+    *alloc = (SnPoolAllocator){
         .mem = mem,
         .size = size,
         .block_size = block_size,
@@ -77,9 +77,9 @@ SN_INLINE bool sn_pool_allocator_init(
  *
  * @note Does not free memory buffer
  */
-SN_FORCE_INLINE void sn_pool_allocator_deinit(snPoolAllocator *alloc) {
+SN_FORCE_INLINE void sn_pool_allocator_deinit(SnPoolAllocator *alloc) {
     if (!alloc) return;
-    *alloc = (snPoolAllocator){0};
+    *alloc = (SnPoolAllocator){0};
 }
 
 /**
@@ -89,7 +89,7 @@ SN_FORCE_INLINE void sn_pool_allocator_deinit(snPoolAllocator *alloc) {
  * @param mem Pointer to the new memory (must be right next to current memory).
  * @param size Size of the new memory.
  */
-SN_FORCE_INLINE void sn_pool_allocator_increase_memory_size(snPoolAllocator *alloc, void *mem, uint64_t size) {
+SN_FORCE_INLINE void sn_pool_allocator_increase_memory_size(SnPoolAllocator *alloc, void *mem, uint64_t size) {
     if (!alloc || size < alloc->block_size) return;
     SN_ASSERT(alloc->mem + alloc->size == mem);
     alloc->size += size;
@@ -127,7 +127,7 @@ SN_FORCE_INLINE void sn_pool_allocator_increase_memory_size(snPoolAllocator *all
  *
  * @return Pointer to allocated block or NULL if exhausted
  */
-SN_FORCE_INLINE void *sn_pool_allocator_allocate(snPoolAllocator *alloc) {
+SN_FORCE_INLINE void *sn_pool_allocator_allocate(SnPoolAllocator *alloc) {
     if (!alloc) return NULL;
 
     void *ptr = alloc->free_list;
@@ -150,7 +150,7 @@ SN_FORCE_INLINE void *sn_pool_allocator_allocate(snPoolAllocator *alloc) {
  * - ptr must be returned by this allocator
  * - ptr must not be freed twice
  */
-SN_FORCE_INLINE void sn_pool_allocator_free(snPoolAllocator *alloc, void *ptr) {
+SN_FORCE_INLINE void sn_pool_allocator_free(SnPoolAllocator *alloc, void *ptr) {
     if (!ptr || !alloc) return;
 
     SN_ASSERT((uint8_t *)ptr >= alloc->mem);
@@ -167,7 +167,7 @@ SN_FORCE_INLINE void sn_pool_allocator_free(snPoolAllocator *alloc, void *ptr) {
  *
  * @param alloc Pointer to allocator context
  */
-SN_FORCE_INLINE uint64_t sn_pool_allocator_get_block_count(snPoolAllocator *alloc) {
+SN_FORCE_INLINE uint64_t sn_pool_allocator_get_block_count(SnPoolAllocator *alloc) {
     if (!alloc) return 0;
     return alloc->block_count;
 }
@@ -177,7 +177,7 @@ SN_FORCE_INLINE uint64_t sn_pool_allocator_get_block_count(snPoolAllocator *allo
  *
  * @param alloc Pointer to allocator context
  */
-SN_FORCE_INLINE uint64_t sn_pool_allocator_get_free_count(snPoolAllocator *alloc) {
+SN_FORCE_INLINE uint64_t sn_pool_allocator_get_free_count(SnPoolAllocator *alloc) {
     if (!alloc) return 0;
     return alloc->free_count;
 }
@@ -187,7 +187,7 @@ SN_FORCE_INLINE uint64_t sn_pool_allocator_get_free_count(snPoolAllocator *alloc
  *
  * @param alloc Pointer to allocator context
  */
-SN_FORCE_INLINE uint64_t sn_pool_allocator_get_used_count(snPoolAllocator *alloc) {
+SN_FORCE_INLINE uint64_t sn_pool_allocator_get_used_count(SnPoolAllocator *alloc) {
     if (!alloc) return 0;
     return alloc->block_count - alloc->free_count;
 }

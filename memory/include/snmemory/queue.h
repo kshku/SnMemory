@@ -2,23 +2,23 @@
 
 #include "snmemory/defines.h"
 
-typedef struct snQueueAllocatorHeader {
+typedef struct SnQueueAllocatorHeader {
     uint8_t *next;
     uint64_t align_diff;
-} snQueueAllocatorHeader;
+} SnQueueAllocatorHeader;
 
 /**
- * @struct snQueueAllocator
+ * @struct SnQueueAllocator
  * @brief Struct to store the queue allocator context.
  *
  * @note None of the sn_queue_allocator* functions are thread-safe.
  */
-typedef struct snQueueAllocator {
+typedef struct SnQueueAllocator {
     uint8_t *mem; /**< Pointer to memory */
     uint64_t size; /**< Size of memory */
     uint8_t *head; /**< Pointer to head */
     uint8_t *tail; /**< Pointer to tail */
-} snQueueAllocator;
+} SnQueueAllocator;
 
 /**
  * @brief Initialize a queue allocator.
@@ -31,12 +31,12 @@ typedef struct snQueueAllocator {
  *
  * @return Returns true on success, false otherwise.
  */
-SN_FORCE_INLINE bool sn_queue_allocator_init(snQueueAllocator *alloc, void *mem, uint64_t size) {
+SN_FORCE_INLINE bool sn_queue_allocator_init(SnQueueAllocator *alloc, void *mem, uint64_t size) {
     if (!alloc || !mem || !size) return false;
 
-    if (size < sizeof(snQueueAllocatorHeader) * 2) return false;
+    if (size < sizeof(SnQueueAllocatorHeader) * 2) return false;
 
-    *alloc = (snQueueAllocator){.mem = (uint8_t *)mem, .head = NULL, .tail = NULL, .size = size};
+    *alloc = (SnQueueAllocator){.mem = (uint8_t *)mem, .head = NULL, .tail = NULL, .size = size};
 
     return true;
 }
@@ -49,9 +49,9 @@ SN_FORCE_INLINE bool sn_queue_allocator_init(snQueueAllocator *alloc, void *mem,
  *
  * @param alloc Pointer to the allocator context.
  */
-SN_FORCE_INLINE void sn_queue_allocator_deinit(snQueueAllocator *alloc) {
+SN_FORCE_INLINE void sn_queue_allocator_deinit(SnQueueAllocator *alloc) {
     if (!alloc) return;
-    *alloc = (snQueueAllocator){0};
+    *alloc = (SnQueueAllocator){0};
 }
 
 /**
@@ -63,19 +63,19 @@ SN_FORCE_INLINE void sn_queue_allocator_deinit(snQueueAllocator *alloc) {
  *
  * @return Returns pointer to allocated memory or NULL no failure.
  */
-SN_INLINE void *sn_queue_allocator_allocate(snQueueAllocator *alloc, uint64_t size, uint64_t align) {
+SN_INLINE void *sn_queue_allocator_allocate(SnQueueAllocator *alloc, uint64_t size, uint64_t align) {
     if (!size || !align || !alloc) return NULL;
 
-    snQueueAllocatorHeader *head_header = (snQueueAllocatorHeader *)alloc->head;
+    SnQueueAllocatorHeader *head_header = (SnQueueAllocatorHeader *)alloc->head;
     uint8_t *mem_end = alloc->mem + alloc->size;
 
     uint8_t *raw_head = alloc->head ? head_header->next : alloc->mem;
-    snQueueAllocatorHeader *new_head = SN_GET_ALIGNED_PTR(raw_head, snQueueAllocatorHeader);
+    SnQueueAllocatorHeader *new_head = SN_GET_ALIGNED_PTR(raw_head, SnQueueAllocatorHeader);
 
     void *aligned = (void *)SN_GET_ALIGNED(new_head + 1, align);
 
     uint64_t align_diff = SN_PTR_DIFF(aligned, new_head + 1);
-    uint64_t required_size = size + sizeof(snQueueAllocatorHeader) + align_diff;
+    uint64_t required_size = size + sizeof(SnQueueAllocatorHeader) + align_diff;
 
     uint64_t free_size = 0;
     if ((uint8_t *)new_head < mem_end) {
@@ -89,7 +89,7 @@ SN_INLINE void *sn_queue_allocator_allocate(snQueueAllocator *alloc, uint64_t si
     if (free_size < required_size && alloc->tail && alloc->tail < (uint8_t *)new_head) {
         required_size -= align_diff;
 
-        new_head = SN_GET_ALIGNED_PTR(alloc->mem, snQueueAllocatorHeader);
+        new_head = SN_GET_ALIGNED_PTR(alloc->mem, SnQueueAllocatorHeader);
         aligned = (void *)SN_GET_ALIGNED(new_head + 1, align);
         align_diff = SN_PTR_DIFF(aligned, new_head + 1);
 
@@ -109,7 +109,7 @@ SN_INLINE void *sn_queue_allocator_allocate(snQueueAllocator *alloc, uint64_t si
         alloc->tail = (uint8_t *)new_head;
     }
 
-    *new_head = (snQueueAllocatorHeader){.next = ((uint8_t *)aligned) + size, .align_diff = align_diff};
+    *new_head = (SnQueueAllocatorHeader){.next = ((uint8_t *)aligned) + size, .align_diff = align_diff};
 
     if ((uint8_t *)new_head < alloc->tail) SN_ASSERT(new_head->next <= alloc->tail);
 
@@ -122,10 +122,10 @@ SN_INLINE void *sn_queue_allocator_allocate(snQueueAllocator *alloc, uint64_t si
  * @param alloc Pointer to the allocator context.
  * @param ptr The pointer to free.
  */
-SN_INLINE void sn_queue_allocator_free(snQueueAllocator *alloc, void *ptr) {
+SN_INLINE void sn_queue_allocator_free(SnQueueAllocator *alloc, void *ptr) {
     if (!ptr || !alloc) return;
 
-    snQueueAllocatorHeader *header = (snQueueAllocatorHeader *)alloc->tail;
+    SnQueueAllocatorHeader *header = (SnQueueAllocatorHeader *)alloc->tail;
     SN_ASSERT(ptr == (void *)(((uint8_t *)(header + 1)) + header->align_diff));
 
     if (alloc->tail == alloc->head) alloc->tail = alloc->head = NULL;
@@ -137,7 +137,7 @@ SN_INLINE void sn_queue_allocator_free(snQueueAllocator *alloc, void *ptr) {
  *
  * @param alloc Pointer to the allocator context.
  */
-SN_FORCE_INLINE void sn_queue_allocator_reset(snQueueAllocator *alloc) {
+SN_FORCE_INLINE void sn_queue_allocator_reset(SnQueueAllocator *alloc) {
     if (!alloc) return;
     alloc->head = alloc->tail = NULL;
 }
@@ -149,7 +149,7 @@ SN_FORCE_INLINE void sn_queue_allocator_reset(snQueueAllocator *alloc) {
  *
  * @return Returns size of memory that is not available for allocation.
  */
-SN_FORCE_INLINE uint64_t sn_queue_allocator_get_allocated_size(snQueueAllocator *alloc) {
+SN_FORCE_INLINE uint64_t sn_queue_allocator_get_allocated_size(SnQueueAllocator *alloc) {
     if (!alloc || alloc->tail == NULL) return 0;
 
     uint64_t size = 0;
@@ -160,7 +160,7 @@ SN_FORCE_INLINE uint64_t sn_queue_allocator_get_allocated_size(snQueueAllocator 
         size += SN_PTR_DIFF(alloc->head, alloc->tail);
     }
 
-    snQueueAllocatorHeader *head_header = (snQueueAllocatorHeader *)alloc->head;
+    SnQueueAllocatorHeader *head_header = (SnQueueAllocatorHeader *)alloc->head;
     size += SN_PTR_DIFF(head_header->next, alloc->head);
 
     return size;
@@ -176,7 +176,7 @@ SN_FORCE_INLINE uint64_t sn_queue_allocator_get_allocated_size(snQueueAllocator 
  * @note entire size might not be used for allocation,
  * few bytes might be unused for maintaining alignment and headers.
  */
-SN_FORCE_INLINE uint64_t sn_queue_allocator_get_remaining_size(snQueueAllocator *alloc) {
+SN_FORCE_INLINE uint64_t sn_queue_allocator_get_remaining_size(SnQueueAllocator *alloc) {
     if (!alloc) return 0;
 
     if (alloc->tail == NULL) return alloc->size;
@@ -189,7 +189,7 @@ SN_FORCE_INLINE uint64_t sn_queue_allocator_get_remaining_size(snQueueAllocator 
         size += SN_PTR_DIFF(alloc->tail, alloc->head);
     }
 
-    snQueueAllocatorHeader *head_header = (snQueueAllocatorHeader *)alloc->head;
+    SnQueueAllocatorHeader *head_header = (SnQueueAllocatorHeader *)alloc->head;
     size -= SN_PTR_DIFF(head_header->next, alloc->head);
 
     return size;

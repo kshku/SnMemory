@@ -4,7 +4,7 @@
 #include "snmemory/linear.h"
 
 /**
- * @struct snFrameAllocator
+ * @struct SnFrameAllocator
  * @brief Frame-based memory allocator.
  *
  * Allocations made between begin() and end() calls
@@ -16,10 +16,10 @@
  * - Intended for per-frame temporary allocations
  * - Nesting is not supported
  */
-typedef struct snFrameAllocator {
-    snLinearAllocator arena; /**< Underlying linear allocator */
+typedef struct SnFrameAllocator {
+    SnLinearAllocator arena; /**< Underlying linear allocator */
     snMemoryMark frame_mark; /**< Mark at frame begin */
-} snFrameAllocator;
+} SnFrameAllocator;
 
 /**
  * @brief Initialize frame allocator.
@@ -30,7 +30,7 @@ typedef struct snFrameAllocator {
  *
  * @return true on success, false on failure
  */
-SN_FORCE_INLINE bool sn_frame_allocator_init(snFrameAllocator *alloc, void *mem, uint64_t size) {
+SN_FORCE_INLINE bool sn_frame_allocator_init(SnFrameAllocator *alloc, void *mem, uint64_t size) {
     if (!alloc || !sn_linear_allocator_init(&alloc->arena, mem, size)) return false;
 
     alloc->frame_mark = NULL;
@@ -44,7 +44,7 @@ SN_FORCE_INLINE bool sn_frame_allocator_init(snFrameAllocator *alloc, void *mem,
  *
  * @note Does not free memory buffer
  */
-SN_FORCE_INLINE void sn_frame_allocator_deinit(snFrameAllocator *alloc) {
+SN_FORCE_INLINE void sn_frame_allocator_deinit(SnFrameAllocator *alloc) {
     if (!alloc) return;
 
     sn_linear_allocator_deinit(&alloc->arena);
@@ -58,7 +58,7 @@ SN_FORCE_INLINE void sn_frame_allocator_deinit(snFrameAllocator *alloc) {
  * @param mem Pointer to the new memory (must be right next to current memory).
  * @param size Size of the new memory.
  */
-SN_FORCE_INLINE void sn_frame_allocator_increase_memory_size(snFrameAllocator *alloc, void *mem, uint64_t size) {
+SN_FORCE_INLINE void sn_frame_allocator_increase_memory_size(SnFrameAllocator *alloc, void *mem, uint64_t size) {
     if (!alloc) return;
     sn_linear_allocator_increase_memory_size(&alloc->arena, mem, size);
 }
@@ -70,7 +70,7 @@ SN_FORCE_INLINE void sn_frame_allocator_increase_memory_size(snFrameAllocator *a
  *
  * All allocations after this call belong to the frame.
  */
-SN_FORCE_INLINE void sn_frame_allocator_begin(snFrameAllocator *alloc) {
+SN_FORCE_INLINE void sn_frame_allocator_begin(SnFrameAllocator *alloc) {
     if (!alloc) return;
 
     alloc->frame_mark = sn_linear_allocator_get_memory_mark(&alloc->arena);
@@ -83,7 +83,7 @@ SN_FORCE_INLINE void sn_frame_allocator_begin(snFrameAllocator *alloc) {
  *
  * Frees all allocations made since begin().
  */
-SN_FORCE_INLINE void sn_frame_allocator_end(snFrameAllocator *alloc) {
+SN_FORCE_INLINE void sn_frame_allocator_end(SnFrameAllocator *alloc) {
     if (!alloc) return;
 
     SN_ASSERT(alloc->frame_mark != NULL);
@@ -100,7 +100,7 @@ SN_FORCE_INLINE void sn_frame_allocator_end(snFrameAllocator *alloc) {
  *
  * @return Pointer to allocated memory or NULL on failure
  */
-SN_FORCE_INLINE void *sn_frame_allocator_allocate(snFrameAllocator *alloc, uint64_t size, uint64_t align) {
+SN_FORCE_INLINE void *sn_frame_allocator_allocate(SnFrameAllocator *alloc, uint64_t size, uint64_t align) {
     if (!alloc) return NULL;
     return sn_linear_allocator_allocate(&alloc->arena, size, align);
 }
@@ -110,7 +110,7 @@ SN_FORCE_INLINE void *sn_frame_allocator_allocate(snFrameAllocator *alloc, uint6
  *
  * @param alloc Pointer to frame allocator
  */
-SN_FORCE_INLINE uint64_t sn_frame_allocator_get_frame_usage(snFrameAllocator *alloc) {
+SN_FORCE_INLINE uint64_t sn_frame_allocator_get_frame_usage(SnFrameAllocator *alloc) {
     if (!alloc) return 0;
     return sn_linear_allocator_get_allocated_size(&alloc->arena);
 }
@@ -120,7 +120,7 @@ SN_FORCE_INLINE uint64_t sn_frame_allocator_get_frame_usage(snFrameAllocator *al
  *
  * @param alloc Pointer to frame allocator
  */
-SN_FORCE_INLINE uint64_t sn_frame_allocator_get_remaining_size(snFrameAllocator *alloc) {
+SN_FORCE_INLINE uint64_t sn_frame_allocator_get_remaining_size(SnFrameAllocator *alloc) {
     if (!alloc) return 0;
     return sn_linear_allocator_get_remaining_size(&alloc->arena);
 }
