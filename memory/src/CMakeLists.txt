@@ -1,5 +1,4 @@
 set(HEADERFILES
-    platform.h
     defines.h
     allocator.h
     linear.h

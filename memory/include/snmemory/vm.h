@@ -15,7 +15,7 @@
  * @note The address is a hint; the OS may choose a different address.
  * @note Memory is not zeroed out.
  */
-SN_API void *sn_vm_reserve(void *address, uint32_t pages);
+SN_MEMORY_API void *sn_vm_reserve(void *address, uint32_t pages);
 
 /**
  * @brief Make the reserved region usable.
@@ -29,7 +29,7 @@ SN_API void *sn_vm_reserve(void *address, uint32_t pages);
  *
  * @return Returns true on success, false otherwise.
  */
-SN_API bool sn_vm_commit(void *ptr, uint32_t pages);
+SN_MEMORY_API bool sn_vm_commit(void *ptr, uint32_t pages);
 
 /**
  * @brief Decommits the commited memory.
@@ -43,7 +43,7 @@ SN_API bool sn_vm_commit(void *ptr, uint32_t pages);
  *
  * @return Returns true on success, false otherwise.
  */
-SN_API bool sn_vm_decommit(void *ptr, uint32_t pages);
+SN_MEMORY_API bool sn_vm_decommit(void *ptr, uint32_t pages);
 
 /**
  * @brief Release reserved address space.
@@ -55,12 +55,12 @@ SN_API bool sn_vm_decommit(void *ptr, uint32_t pages);
  *
  * @return Returns true on succes, false otherwise.
  */
-SN_API bool sn_vm_release(void *ptr, uint32_t pages);
+SN_MEMORY_API bool sn_vm_release(void *ptr, uint32_t pages);
 
 /**
  * @brief Get the page size.
  *
  * @return Returns page size.
  */
-SN_API uint64_t sn_vm_get_page_size(void);
+SN_MEMORY_API uint64_t sn_vm_get_page_size(void);
 
