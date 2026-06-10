@@ -206,7 +206,6 @@ static void test_linear_allocator_exhaustion(void) {
 
     TEST_ASSERT(sn_linear_allocator_init(&alloc, buffer, sizeof(buffer)));
 
-    uint64_t used = 0;
     while (true) {
         uint64_t size = rand_range(1, 64);
         uint64_t align = 1ULL << rand_range(0, 5);  // 1..32
@@ -215,7 +214,6 @@ static void test_linear_allocator_exhaustion(void) {
         if (!p) break;
 
         TEST_ASSERT(SN_IS_ALIGNED(p, align));
-        used += size;
     }
 
     TEST_ASSERT(sn_linear_allocator_get_remaining_size(&alloc) < (64 + 32));
@@ -538,8 +536,6 @@ static void test_queue_allocator_exhaustion(void) {
     sn_queue_allocator_init(&alloc, buffer, sizeof(buffer));
 
     void *ptrs[128];
-    uint64_t sizes[128];
-    uint64_t aligns[128];
     int count = 0;
 
     while (true) {
@@ -554,8 +550,6 @@ static void test_queue_allocator_exhaustion(void) {
 
         fill_pattern(p, size, (uint8_t)count);
 
-        sizes[count] = size;
-        aligns[count] = align;
         ptrs[count++] = p;
 
         TEST_ASSERT(count < 128);
