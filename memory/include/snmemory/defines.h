@@ -1,6 +1,6 @@
 #pragma once
 
-#include "snmemory/platform.h"
+#include <sncore/platform.h>
 
 #include <assert.h>
 #include <stdalign.h>

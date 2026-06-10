@@ -6,6 +6,13 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 17)
 
+include(FetchContent)
+FetchContent_Declare(sncore
+    GIT_REPOSITORY https://github.com/kshku/SnCore.git
+    GIT_TAG main
+)
+FetchContent_MakeAvailable(sncore)
+
 add_library(sn_memory_configs INTERFACE)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

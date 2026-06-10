@@ -88,7 +88,7 @@ void sn_freelist_allocator_increase_memory_size(SnFreeListAllocator *alloc, void
  *
  * @return Pointer to allocated memory or NULL on failure
  */
-SN_API void *sn_freelist_allocator_allocate(SnFreeListAllocator *alloc, uint64_t size, uint64_t align);
+SN_MEMORY_API void *sn_freelist_allocator_allocate(SnFreeListAllocator *alloc, uint64_t size, uint64_t align);
 
 /**
  * @brief Free memory allocated by free-list allocator.
@@ -100,7 +100,7 @@ SN_API void *sn_freelist_allocator_allocate(SnFreeListAllocator *alloc, uint64_t
  * - ptr must be returned by this allocator
  * - ptr must not be freed twice
  */
-SN_API void sn_freelist_allocator_free(SnFreeListAllocator *alloc, void *ptr);
+SN_MEMORY_API void sn_freelist_allocator_free(SnFreeListAllocator *alloc, void *ptr);
 
 /**
  * @brief Reallocate memory allocated by free-list allocator.
@@ -113,7 +113,7 @@ SN_API void sn_freelist_allocator_free(SnFreeListAllocator *alloc, void *ptr);
  * @note
  * - ptr must be returned by this allocator
  */
-SN_API void *sn_freelist_allocator_reallocate(
+SN_MEMORY_API void *sn_freelist_allocator_reallocate(
     SnFreeListAllocator *alloc, void *ptr, uint64_t new_size, uint64_t align);
 
 /**

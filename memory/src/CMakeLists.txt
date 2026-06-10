@@ -1,11 +1,12 @@
 set(HEADERFILES
-    platform.h
     defines.h
+    allocator.h
     linear.h
     stack.h
     pool.h
     freelist.h
     queue.h
+    ring_buffer.h
     vm.h
 )
 
