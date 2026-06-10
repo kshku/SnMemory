@@ -568,7 +568,7 @@ static void test_vm_basic(void) {
 
     TEST_ASSERT(page_size > 0);
 
-    void *ptr = sn_vm_reserve(4);
+    void *ptr = sn_vm_reserve(NULL, 4);
 
     TEST_ASSERT(ptr);
 

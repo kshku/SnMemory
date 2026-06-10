@@ -6,14 +6,16 @@
 /**
  * @brief Reserve address space.
  *
+ * @param address Preferred address for the region (hint). Pass NULL to let the OS pick.
  * @param pages Number of pages to allocate.
  *
  * @return Returns pointer to reserved address or NULL on failure.
  *
  * @note Address will be aligned to page.
+ * @note The address is a hint; the OS may choose a different address.
  * @note Memory is not zeroed out.
  */
-SN_API void *sn_vm_reserve(uint32_t pages);
+SN_API void *sn_vm_reserve(void *address, uint32_t pages);
 
 /**
  * @brief Make the reserved region usable.

@@ -413,7 +413,7 @@ static void test_vm_basic(void) {
     const uint32_t pages = 4;
 
     /* Reserve address space */
-    void *ptr = sn_vm_reserve(pages);
+    void *ptr = sn_vm_reserve(NULL, pages);
     TEST_ASSERT(ptr != NULL);
 
     /* Commit pages */

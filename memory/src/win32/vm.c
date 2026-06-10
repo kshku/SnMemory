@@ -4,8 +4,8 @@
 
     #include <windows.h>
 
-void *sn_vm_reserve(uint32_t pages) {
-    return VirtualAlloc(NULL, pages * sn_vm_get_page_size(), MEM_RESERVE, PAGE_NOACCESS);
+void *sn_vm_reserve(void *address, uint32_t pages) {
+    return VirtualAlloc(address, pages * sn_vm_get_page_size(), MEM_RESERVE, PAGE_NOACCESS);
 }
 
 bool sn_vm_commit(void *ptr, uint32_t pages) {
