@@ -9,6 +9,9 @@ target_link_libraries(sn_memory_test PRIVATE snmemory)
 add_executable(test2 test2.c)
 target_link_libraries(test2 PRIVATE snmemory)
 
+add_executable(ring_buffer_test ring_buffer_test.c)
+target_link_libraries(ring_buffer_test PRIVATE snmemory)
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND SN_MEMORY_BUILD_SHARED)
     add_custom_target(copy_dlls ALL
         COMMENT "Copy the dlls"

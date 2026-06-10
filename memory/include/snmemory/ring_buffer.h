@@ -35,40 +35,28 @@ SN_INLINE void *sn_ring_buffer_allocate(SnRingBuffer *rb, uint64_t size, uint64_
     uint64_t read = rb->read_offset;
     uint64_t write = rb->write_offset;
 
-    uint64_t aligned = (uint64_t)SN_GET_ALIGNED(rb->buffer + write, alignment);
-    if (aligned > write) {
-        aligned = (uint64_t)(rb->buffer + write) + alignment - 1;
-        aligned = (aligned & ~(alignment - 1)) - (uint64_t)rb->buffer;
-    } else {
-        aligned = write;
-    }
-    uint64_t new_write = aligned + size;
+    void *unaligned = rb->buffer + write;
+    void *aligned_ptr = SN_GET_ALIGNED(unaligned, alignment);
 
-    bool wraps = false;
-    if (new_write > rb->size) {
-        wraps = true;
-        new_write = size;
-        aligned = 0;
+    uint64_t aligned = (uint8_t *)aligned_ptr - rb->buffer;
+    uint64_t padded_size = size + (aligned - write);
+
+    if (sn_ring_buffer_free_size(rb) < padded_size) return NULL;
+
+    if ((write >= read && write + padded_size <= rb->size)
+        || (write < read && write + padded_size < read)) {
+        rb->write_offset = write + padded_size;
+        return aligned_ptr;
     }
 
-    if (wraps) {
-        if (read <= write) {
-            if (read <= new_write) return NULL;
-        }
-    } else {
-        if (read > write) {
-            if (aligned < read && new_write > read) return NULL;
-        } else if (read <= aligned && new_write >= read) {
-            wraps = true;
-            new_write = size;
-            aligned = 0;
-            if (read <= new_write) return NULL;
-        }
+    if (write >= read && read > padded_size) {
+        void *begin_aligned = SN_GET_ALIGNED(rb->buffer, alignment);
+        uint64_t begin_offset = (uint8_t *)begin_aligned - rb->buffer;
+        rb->write_offset = begin_offset + size;
+        return begin_aligned;
     }
 
-    void *ptr = rb->buffer + aligned;
-    rb->write_offset = new_write;
-    return ptr;
+    return NULL;
 }
 
 SN_INLINE void sn_ring_buffer_advance_read(SnRingBuffer *rb, uint64_t size) {
