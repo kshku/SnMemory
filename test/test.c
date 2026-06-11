@@ -11,7 +11,7 @@
     do {                                                                                                    \
         if (!(x)) {                                                                                         \
             fprintf(stderr, "ASSERT FAILED: %s in function %s(%s:%d)\n", #x, __func__, __FILE__, __LINE__); \
-            __asm__ volatile("int $3");                                                                     \
+            abort();                                                                                        \
         }                                                                                                   \
     } while (0)
 
