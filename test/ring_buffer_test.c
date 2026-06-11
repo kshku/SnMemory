@@ -9,7 +9,7 @@
     do {                                                                                                    \
         if (!(x)) {                                                                                         \
             fprintf(stderr, "ASSERT FAILED: %s in function %s(%s:%d)\n", #x, __func__, __FILE__, __LINE__); \
-            __asm__ volatile("int $3");                                                                     \
+            abort();                                                                                        \
         }                                                                                                   \
     } while (0)
 
@@ -18,14 +18,14 @@
 static int tests_run = 0;
 static int tests_passed = 0;
 
-#define RUN_TEST(name)                    \
-    do {                                  \
-        tests_run++;                      \
-        printf("  %s...", #name);         \
-        fflush(stdout);                   \
-        name();                           \
-        printf(" passed\n");              \
-        tests_passed++;                   \
+#define RUN_TEST(name)            \
+    do {                          \
+        tests_run++;              \
+        printf("  %s...", #name); \
+        fflush(stdout);           \
+        name();                   \
+        printf(" passed\n");      \
+        tests_passed++;           \
     } while (0)
 
 static void test_init(void) {
