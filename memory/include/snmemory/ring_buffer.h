@@ -6,10 +6,10 @@
  * @struct SnRignBufferAllocator
  */
 typedef struct SnRingBufferAllocator {
-    uint8_t  *buffer;
-    uint64_t  size;
-    uint64_t  write_offset;
-    uint64_t  read_offset;
+    uint8_t *buffer;
+    uint64_t size;
+    uint64_t write_offset;
+    uint64_t read_offset;
 } SnRingBufferAllocator;
 
 SN_FORCE_INLINE bool sn_ring_buffer_allocator_init(SnRingBufferAllocator *alloc, void *mem, uint64_t size) {

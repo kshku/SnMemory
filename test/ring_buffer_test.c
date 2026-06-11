@@ -18,14 +18,14 @@
 static int tests_run = 0;
 static int tests_passed = 0;
 
-#define RUN_TEST(name)                    \
-    do {                                  \
-        tests_run++;                      \
-        printf("  %s...", #name);         \
-        fflush(stdout);                   \
-        name();                           \
-        printf(" passed\n");              \
-        tests_passed++;                   \
+#define RUN_TEST(name)            \
+    do {                          \
+        tests_run++;              \
+        printf("  %s...", #name); \
+        fflush(stdout);           \
+        name();                   \
+        printf(" passed\n");      \
+        tests_passed++;           \
     } while (0)
 
 static void test_init(void) {

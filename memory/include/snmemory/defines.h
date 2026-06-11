@@ -1,8 +1,7 @@
 #pragma once
 
-#include <sncore/defines.h>
-
 #include <assert.h>
+#include <sncore/defines.h>
 #include <stdalign.h>
 #include <stdbool.h>
 #include <stddef.h>
