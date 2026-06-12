@@ -1,7 +1,8 @@
 #pragma once
 
 #include "snmemory/api.h"
-#include "snmemory/defines.h"
+
+#include <sncore/defines.h>
 
 typedef struct SnFreeNode {
     uint64_t size;

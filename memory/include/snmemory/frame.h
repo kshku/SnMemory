@@ -1,7 +1,8 @@
 #pragma once
 
-#include "snmemory/defines.h"
 #include "snmemory/linear.h"
+
+#include <sncore/defines.h>
 
 /**
  * @struct SnFrameAllocator

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "snmemory/defines.h"
+#include <sncore/defines.h>
 
 typedef struct SnStackAllocatorFooter {
     uint8_t *previous_top;
