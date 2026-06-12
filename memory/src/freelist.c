@@ -1,5 +1,6 @@
 #include "snmemory/freelist.h"
 
+#include <sncore/utils.h>
 #include <string.h>
 
 #define SPLITTING_THRESHOLD (sizeof(SnFreeNode) + SN_FREELIST_SPLITTING_THRESHOLD)
@@ -9,9 +10,9 @@
 
 static SnFreeNode *first_fit(SnFreeNode *freenode, uint64_t size, SnFreeNode **previous_freenode);
 
-static void write_to_bytes(void *bytes, uint64_t value, bool reverse);
+static void sn_write_to_bytes(void *bytes, uint64_t value, bool reverse);
 
-static uint64_t read_from_bytes(void *bytes, bool reverse);
+static uint64_t sn_read_from_bytes(void *bytes, bool reverse);
 
 static void try_merge(SnFreeNode *previous_node, SnFreeNode *node);
 
@@ -33,7 +34,7 @@ void *sn_freelist_allocator_allocate(SnFreeListAllocator *alloc, uint64_t size, 
 
     // Get next aligned number (ensures we have padding before user pointer)
     void *aligned = (void *)SN_GET_NEXT_ALIGNED(node + 1, align);
-    write_to_bytes(PADDING_BYTE(aligned), SN_PTR_DIFF(aligned, node), true);
+    sn_write_to_bytes(PADDING_BYTE(aligned), SN_PTR_DIFF(aligned, node), true);
 
     split_node_if_possible(node, size);
 
@@ -46,7 +47,7 @@ void *sn_freelist_allocator_allocate(SnFreeListAllocator *alloc, uint64_t size, 
 void sn_freelist_allocator_free(SnFreeListAllocator *alloc, void *ptr) {
     if (!ptr || !alloc) return;
 
-    uint64_t diff_to_node = read_from_bytes(PADDING_BYTE(ptr), true);
+    uint64_t diff_to_node = sn_read_from_bytes(PADDING_BYTE(ptr), true);
     SnFreeNode *node = (SnFreeNode *)(((uint8_t *)ptr) - diff_to_node);
 
     SnFreeNode *previous_freenode = get_previous_free_node(alloc->free_list, node);
@@ -66,7 +67,7 @@ void sn_freelist_allocator_free(SnFreeListAllocator *alloc, void *ptr) {
 void *sn_freelist_allocator_reallocate(SnFreeListAllocator *alloc, void *ptr, uint64_t new_size, uint64_t align) {
     if (!ptr || !new_size || !align || !alloc) return NULL;
 
-    uint64_t diff_to_node = read_from_bytes(PADDING_BYTE(ptr), true);
+    uint64_t diff_to_node = sn_read_from_bytes(PADDING_BYTE(ptr), true);
     SnFreeNode *node = (SnFreeNode *)(((uint8_t *)ptr) - diff_to_node);
 
     uint64_t current_size = SN_PTR_DIFF(NODE_END(node), ptr);
@@ -190,38 +191,6 @@ static SnFreeNode *first_fit(SnFreeNode *freenode, uint64_t size, SnFreeNode **p
     }
 
     return NULL;
-}
-
-static void write_to_bytes(void *bytes, uint64_t value, bool reverse) {
-    // value is never 0, and we will always have enough bytes to write the value.
-    uint8_t *p = (uint8_t *)bytes;
-    uint8_t inc = reverse ? -1 : 1;
-
-    while (value) {
-        *p = (value % SN_BIT_FLAG(7));
-        value >>= 7;
-        SN_BIT_SET(*p, 7);
-        p += inc;
-    }
-
-    p -= inc;
-    SN_BIT_CLEAR(*p, 7);
-}
-
-static uint64_t read_from_bytes(void *bytes, bool reverse) {
-    uint8_t *p = (uint8_t *)bytes;
-    uint8_t inc = reverse ? -1 : 1;
-    uint64_t value = 0, i = 0;
-
-    while (SN_BIT_CHECK(*p, 7)) {
-        value |= (uint64_t)(SN_BIT_CLEARED_VALUE(*p, 7)) << i;
-        i += 7;
-        p += inc;
-    }
-
-    value |= (uint64_t)*p << i;
-
-    return value;
 }
 
 static SnFreeNode *get_previous_free_node(SnFreeNode *freelist, SnFreeNode *node) {
