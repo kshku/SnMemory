@@ -1,5 +1,4 @@
 set(HEADERFILES
-    defines.h
     allocator.h
     linear.h
     stack.h

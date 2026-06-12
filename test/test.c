@@ -1,4 +1,3 @@
-#include <snmemory/defines.h>
 #include <snmemory/snmemory.h>
 #include <stdbool.h>
 #include <stdint.h>
