@@ -1,6 +1,5 @@
 #pragma once
 
-#include "snmemory/allocator.h"
 #include "snmemory/frame.h"
 #include "snmemory/freelist.h"
 #include "snmemory/linear.h"

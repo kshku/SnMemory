@@ -1,10 +1,15 @@
 # Changelog
 
-## [0.1.0] — 2026-06-11
+## [0.2.0] - 2026-06-12
+
+## Removed
+- SnAllocator - SnCore defines SnMemoryAllocator
+
+## [0.1.0] - 2026-06-11
 
 - First release. See [0.0.0] section in CHANGELOG.md for full changelog.
 
-## [0.0.0] — 2025-12-26
+## [0.0.0] - 2025-12-26
 
 ### Added
 - Linear (arena) allocator — O(1) allocate, bulk reset
