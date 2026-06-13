@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sncore/defines.h>
+#include <sncore/types.h>
 
 typedef struct SnQueueAllocatorHeader {
     uint8_t *next;
@@ -195,3 +196,16 @@ SN_FORCE_INLINE uint64_t sn_queue_allocator_get_remaining_size(SnQueueAllocator 
     return size;
 }
 
+/**
+ * @brief Get the SnMemoryAllocator.
+ *
+ * @param alloc Pointer to queue allocator.
+ */
+SN_FORCE_INLINE SnMemoryAllocator sn_queue_allocator_get_allocator(SnQueueAllocator *alloc) {
+    return (SnMemoryAllocator){
+        .data = alloc,
+        .alloc = (SnMemoryAllocateFn)sn_queue_allocator_allocate,
+        .realloc = NULL,
+        .free = (SnMemoryFreeFn)sn_queue_allocator_free,
+    };
+}

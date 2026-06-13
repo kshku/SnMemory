@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sncore/defines.h>
+#include <sncore/types.h>
 
 /**
  * @struct SnPoolAllocator
@@ -192,3 +193,22 @@ SN_FORCE_INLINE uint64_t sn_pool_allocator_get_used_count(SnPoolAllocator *alloc
     return alloc->block_count - alloc->free_count;
 }
 
+SN_INLINE void *sn_pool_allocator_allocate_wrapper(void *data, uint64_t size, uint64_t align) {
+    SN_UNUSED(size);
+    SN_UNUSED(align);
+    return sn_pool_allocator_allocate((SnPoolAllocator *)data);
+}
+
+/**
+ * @brief Get the SnMemoryAllocator.
+ *
+ * @param alloc Pointer to pool allocator.
+ */
+SN_FORCE_INLINE SnMemoryAllocator sn_pool_allocator_get_allocator(SnPoolAllocator *alloc) {
+    return (SnMemoryAllocator){
+        .data = alloc,
+        .alloc = sn_pool_allocator_allocate_wrapper,
+        .realloc = NULL,
+        .free = (SnMemoryFreeFn)sn_pool_allocator_free,
+    };
+}

@@ -2,8 +2,12 @@
 
 ## [0.2.0] - 2026-06-12
 
+## Added
+- Added sn_\*_allocator_get_allocator function which returns SnMemoryAllocator
+
 ## Removed
 - SnAllocator - SnCore defines SnMemoryAllocator
+
 
 ## [0.1.0] - 2026-06-11
 
