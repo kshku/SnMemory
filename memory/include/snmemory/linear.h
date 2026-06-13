@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sncore/defines.h>
+#include <sncore/types.h>
 
 /**
  * @struct SnLinearAllocator
@@ -156,3 +157,16 @@ SN_FORCE_INLINE void sn_linear_allocator_free_to_memory_mark(SnLinearAllocator *
     if (alloc->top > mark) alloc->top = mark;
 }
 
+/**
+ * @brief Get the SnMemoryAllocator.
+ *
+ * @param alloc Pointer to linear allocator.
+ */
+SN_FORCE_INLINE SnMemoryAllocator sn_linear_allocator_get_allocator(SnLinearAllocator *alloc) {
+    return (SnMemoryAllocator){
+        .data = alloc,
+        .alloc = (SnMemoryAllocateFn)sn_linear_allocator_allocate,
+        .realloc = NULL,
+        .free = NULL,
+    };
+}

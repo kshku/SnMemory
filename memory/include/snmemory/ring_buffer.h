@@ -1,9 +1,10 @@
 #pragma once
 
 #include <sncore/defines.h>
+#include <sncore/types.h>
 
 /**
- * @struct SnRignBufferAllocator
+ * @struct SnRingBufferAllocator
  */
 typedef struct SnRingBufferAllocator {
     uint8_t *buffer;
@@ -84,3 +85,16 @@ SN_FORCE_INLINE void sn_ring_buffer_allocator_reset(SnRingBufferAllocator *alloc
     alloc->read_offset = 0;
 }
 
+/**
+ * @brief Get the SnMemoryAllocator.
+ *
+ * @param alloc Pointer to ring buffer allocator.
+ */
+SN_FORCE_INLINE SnMemoryAllocator sn_ring_buffer_allocator_get_allocator(SnRingBufferAllocator *alloc) {
+    return (SnMemoryAllocator){
+        .data = alloc,
+        .alloc = (SnMemoryAllocateFn)sn_ring_buffer_allocator_allocate,
+        .realloc = NULL,
+        .free = NULL,
+    };
+}

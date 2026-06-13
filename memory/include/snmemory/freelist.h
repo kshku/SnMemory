@@ -3,6 +3,7 @@
 #include "snmemory/api.h"
 
 #include <sncore/defines.h>
+#include <sncore/types.h>
 
 typedef struct SnFreeNode {
     uint64_t size;
@@ -145,4 +146,18 @@ SN_INLINE uint64_t sn_freelist_allocator_get_free_size(SnFreeListAllocator *allo
     }
 
     return size;
+}
+
+/**
+ * @brief Get the SnMemoryAllocator.
+ *
+ * @param alloc Pointer to freelist allocator.
+ */
+SN_FORCE_INLINE SnMemoryAllocator sn_freelist_allocator_get_allocator(SnFreeListAllocator *alloc) {
+    return (SnMemoryAllocator){
+        .data = alloc,
+        .alloc = (SnMemoryAllocateFn)sn_freelist_allocator_allocate,
+        .realloc = (SnMemoryReallocateFn)sn_freelist_allocator_reallocate,
+        .free = (SnMemoryFreeFn)sn_freelist_allocator_free,
+    };
 }

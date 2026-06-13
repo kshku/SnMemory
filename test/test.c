@@ -139,6 +139,11 @@ static void test_frame_allocator(void) {
     uint64_t used = sn_frame_allocator_get_frame_usage(&alloc);
     TEST_ASSERT(used > 0);
 
+    SnMemoryAllocator ma = sn_frame_allocator_get_allocator(&alloc);
+    void *c = ma.alloc(ma.data, 50, 1);
+    TEST_ASSERT(c);
+    TEST_ASSERT(SN_IS_ALIGNED(c, 1));
+
     sn_frame_allocator_end(&alloc);
 
     TEST_ASSERT(sn_frame_allocator_get_frame_usage(&alloc) == 0);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sncore/defines.h>
+#include <sncore/types.h>
 
 typedef struct SnStackAllocatorFooter {
     uint8_t *previous_top;
@@ -144,3 +145,16 @@ SN_FORCE_INLINE uint64_t sn_stack_allocator_get_remaining_size(SnStackAllocator 
     return SN_PTR_DIFF(alloc->mem + alloc->size, alloc->top);
 }
 
+/**
+ * @brief Get the SnMemoryAllocator.
+ *
+ * @param alloc Pointer to stack allocator.
+ */
+SN_FORCE_INLINE SnMemoryAllocator sn_stack_allocator_get_allocator(SnStackAllocator *alloc) {
+    return (SnMemoryAllocator){
+        .data = alloc,
+        .alloc = (SnMemoryAllocateFn)sn_stack_allocator_allocate,
+        .realloc = NULL,
+        .free = (SnMemoryFreeFn)sn_stack_allocator_free,
+    };
+}

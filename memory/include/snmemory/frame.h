@@ -3,6 +3,7 @@
 #include "snmemory/linear.h"
 
 #include <sncore/defines.h>
+#include <sncore/types.h>
 
 /**
  * @struct SnFrameAllocator
@@ -126,3 +127,16 @@ SN_FORCE_INLINE uint64_t sn_frame_allocator_get_remaining_size(SnFrameAllocator 
     return sn_linear_allocator_get_remaining_size(&alloc->arena);
 }
 
+/**
+ * @brief Get the SnMemoryAllocator.
+ *
+ * @param alloc Pointer to frame allocator.
+ */
+SN_FORCE_INLINE SnMemoryAllocator sn_frame_allocator_get_allocator(SnFrameAllocator *alloc) {
+    return (SnMemoryAllocator){
+        .data = alloc,
+        .alloc = (SnMemoryAllocateFn)sn_frame_allocator_allocate,
+        .realloc = NULL,
+        .free = NULL,
+    };
+}
