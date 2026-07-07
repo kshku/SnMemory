@@ -106,7 +106,7 @@ SN_FORCE_INLINE void sn_pool_allocator_increase_memory_size(SnPoolAllocator *all
     *((void **)last_block) = freelist;
     *((void **)freelist) = NULL;
 
-    uint64_t block_count;
+    uint64_t block_count = 0;
     while (((uint64_t)freelist) + alloc->block_size <= ((uint64_t)mem) + size) {
         void *next_block = (void *)(((uint64_t)freelist) + alloc->block_size);
         block_count++;
