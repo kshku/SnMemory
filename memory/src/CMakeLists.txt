@@ -6,10 +6,12 @@ set(HEADERFILES
     queue.h
     ring_buffer.h
     vm.h
+    std_allocator.h
 )
 
 set(SRCS
     freelist.c
+    std_allocator.c
 )
 
 set(SPECIFIC_SRCS

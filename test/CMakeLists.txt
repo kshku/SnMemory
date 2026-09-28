@@ -20,6 +20,11 @@ target_link_libraries(ring_buffer_test PRIVATE snmemory)
 
 add_test(NAME ring_buffer_test COMMAND ring_buffer_test)
 
+add_executable(std_allocator_test std_allocator_test.c)
+target_link_libraries(std_allocator_test PRIVATE snmemory)
+
+add_test(NAME std_allocator_test COMMAND std_allocator_test)
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND SN_MEMORY_BUILD_SHARED)
     add_custom_target(copy_dlls ALL
         COMMENT "Copy the dlls"

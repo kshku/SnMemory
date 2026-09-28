@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.0] - 2026-09-28
+
+### Added
+- Add sn_std_allocator, the standard library backed allocator, moved here
+  from SnCore where it did not belong
+- Add std_allocator.h to the snmemory.h umbrella header
+
+### Changed
+- Build against SnCore v0.3.0, which no longer carries sn_std_allocator
+
+### Known issues
+- sn_std_allocator realloc does not honour a changed alignment when the block
+  moves, so an alignment above 16 can return a pointer away from the preserved
+  contents. Alignments of 16 and below, which is what alignof() yields, are
+  unaffected.
+
 ## [0.2.0] - 2026-06-12
 
 ## Added

@@ -7,4 +7,5 @@
 #include "snmemory/queue.h"
 #include "snmemory/ring_buffer.h"
 #include "snmemory/stack.h"
+#include "snmemory/std_allocator.h"
 #include "snmemory/vm.h"
