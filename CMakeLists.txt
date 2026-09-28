@@ -9,7 +9,7 @@ set(CMAKE_C_STANDARD 17)
 include(FetchContent)
 FetchContent_Declare(sncore
     GIT_REPOSITORY https://github.com/kshku/SnCore.git
-    GIT_TAG v0.3.0
+    GIT_TAG v0.3.1
 )
 FetchContent_MakeAvailable(sncore)
 
