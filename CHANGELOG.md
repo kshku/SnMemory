@@ -6,9 +6,13 @@
 - Add sn_std_allocator, the standard library backed allocator, moved here
   from SnCore where it did not belong
 - Add std_allocator.h to the snmemory.h umbrella header
+- Build the tests against a shared library in CI, which is what catches a
+  symbol that is missing an export macro
 
 ### Changed
-- Build against SnCore v0.3.0, which no longer carries sn_std_allocator
+- Build against SnCore v0.3.1, which fixed the variable length integer
+  helpers. The freelist stores the distance to its node header in one of them,
+  so that fix corrects the freelist too
 
 ### Known issues
 - sn_std_allocator realloc does not honour a changed alignment when the block
