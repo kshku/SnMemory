@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.1] - 2026-09-28
+
+### Fixed
+- Fix sn_std_allocator realloc losing the payload when the block moved. It
+  reallocates a raw block, re-aligns and returns the new address, but only
+  copied anything when the new address happened to match the old one. Every
+  block now starts with a header holding its size, and the bytes are moved from
+  the old offset to the new one
+- Fix sn_std_allocator realloc writing the new offset over the bytes it was
+  about to copy. The offset goes in the byte below the payload, so a payload
+  that shifts upwards lands on top of its own contents. The move happens first
+  now
+- Reject a size and alignment whose raw block would not fit, rather than
+  wrapping around and handing back a block smaller than was asked for
+
 ## [0.3.0] - 2026-09-28
 
 ### Added
