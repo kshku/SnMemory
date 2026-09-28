@@ -54,14 +54,12 @@ static int test_alloc_is_writable_and_independent(void) {
 }
 
 static int test_realloc_preserves_alignment_and_contents(void) {
-    /* Up to and including 16 the shift is always exactly `align` on a 16
-       aligned malloc, so the offset survives a moving realloc. The case above
-       16 is covered once realloc stops re-deriving the offset. */
-    uint64_t aligns[] = {1, 2, 4, 8, 16};
+    uint64_t aligns[] = {1, 2, 4, 8, 16, 32, 64, 128, 256};
 
     for (uint64_t i = 0; i < sizeof(aligns) / sizeof(aligns[0]); ++i) {
         uint8_t *ptr = sn_std_allocator.alloc(sn_std_allocator.data, 40, aligns[i]);
         CHECK(ptr != NULL);
+        CHECK(IS_ALIGNED(ptr, aligns[i]));
         memset(ptr, 0x5A, 40);
 
         /* Grow past the original size, which forces a real block move. */
@@ -72,6 +70,53 @@ static int test_realloc_preserves_alignment_and_contents(void) {
 
         sn_std_allocator.free(sn_std_allocator.data, grown);
     }
+    return 0;
+}
+
+/* The offset of the payload within its block is a variable length integer, so a
+   big enough alignment is a different encoding width. */
+static int test_realloc_preserves_a_multibyte_offset(void) {
+    for (uint64_t align = 2048; align <= 65536; align *= 2) {
+        uint8_t *ptr = sn_std_allocator.alloc(sn_std_allocator.data, 64, align);
+        CHECK(ptr != NULL);
+        CHECK(IS_ALIGNED(ptr, align));
+        memset(ptr, 0x3C, 64);
+
+        uint8_t *grown = sn_std_allocator.realloc(sn_std_allocator.data, ptr, 4096, align);
+        CHECK(grown != NULL);
+        CHECK(IS_ALIGNED(grown, align));
+        for (int j = 0; j < 64; ++j) CHECK(grown[j] == 0x3C);
+
+        sn_std_allocator.free(sn_std_allocator.data, grown);
+    }
+    return 0;
+}
+
+/* Growing and shrinking repeatedly has to keep the size header honest, a stale
+   one either loses the tail on a move or copies past what is there. */
+static int test_realloc_chains_keep_their_contents(void) {
+    uint64_t sizes[] = {16, 4096, 32, 8192, 8, 1024, 48};
+
+    uint8_t *ptr = sn_std_allocator.alloc(sn_std_allocator.data, 16, 64);
+    CHECK(ptr != NULL);
+    uint64_t filled = 16;
+    uint8_t fill = 0x11;
+    memset(ptr, fill, filled);
+
+    for (uint64_t i = 0; i < sizeof(sizes) / sizeof(sizes[0]); ++i) {
+        ptr = sn_std_allocator.realloc(sn_std_allocator.data, ptr, sizes[i], 64);
+        CHECK(ptr != NULL);
+        CHECK(IS_ALIGNED(ptr, 64));
+
+        /* Growing adds uninitialised bytes, so only the overlap is meaningful. */
+        for (uint64_t j = 0; j < SN_MIN(filled, sizes[i]); ++j) CHECK(ptr[j] == fill);
+
+        filled = sizes[i];
+        fill = (uint8_t)(fill + 1);
+        memset(ptr, fill, filled);
+    }
+
+    sn_std_allocator.free(sn_std_allocator.data, ptr);
     return 0;
 }
 
@@ -114,6 +159,8 @@ int main(void) {
         {"alloc_honours_alignment",                  test_alloc_honours_alignment                 },
         {"alloc_is_writable_and_independent",        test_alloc_is_writable_and_independent       },
         {"realloc_preserves_alignment_and_contents", test_realloc_preserves_alignment_and_contents},
+        {"realloc_preserves_a_multibyte_offset",     test_realloc_preserves_a_multibyte_offset    },
+        {"realloc_chains_keep_their_contents",       test_realloc_chains_keep_their_contents      },
         {"realloc_can_shrink",                       test_realloc_can_shrink                      },
         {"works_as_an_allocator_backend",            test_works_as_an_allocator_backend           },
     };
