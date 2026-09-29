@@ -25,6 +25,11 @@ target_link_libraries(std_allocator_test PRIVATE snmemory)
 
 add_test(NAME std_allocator_test COMMAND std_allocator_test)
 
+add_executable(freelist_grow_test freelist_grow_test.c)
+target_link_libraries(freelist_grow_test PRIVATE snmemory)
+
+add_test(NAME freelist_grow_test COMMAND freelist_grow_test)
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND SN_MEMORY_BUILD_SHARED)
     add_custom_target(copy_dlls ALL
         COMMENT "Copy the dlls"

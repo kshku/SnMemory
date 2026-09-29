@@ -10,10 +10,6 @@
 
 static SnFreeNode *first_fit(SnFreeNode *freenode, uint64_t size, SnFreeNode **previous_freenode);
 
-static void sn_write_to_bytes(void *bytes, uint64_t value, bool reverse);
-
-static uint64_t sn_read_from_bytes(void *bytes, bool reverse);
-
 static void try_merge(SnFreeNode *previous_node, SnFreeNode *node);
 
 static SnFreeNode *get_previous_free_node(SnFreeNode *freelist, SnFreeNode *node);
