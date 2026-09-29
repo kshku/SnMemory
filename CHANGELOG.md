@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.2] - 2026-09-28
+
+### Fixed
+- Export sn_freelist_allocator_increase_memory_size from the shared library.
+  Every other out of line function here carries SN_MEMORY_API, so this one was
+  the only symbol a shared build would not resolve for a caller
+
+### Added
+- Test growing a free-list allocator, both with free nodes left and with the
+  free list exhausted, plus the no-op cases. The test links against the shared
+  library, so a missing export fails the build rather than only a shared
+  consumer
+
+### Removed
+- Two static forward declarations of sn_write_to_bytes and
+  sn_read_from_bytes, which sncore declares inline and defines in its header
+
 ## [0.3.1] - 2026-09-28
 
 ### Fixed
