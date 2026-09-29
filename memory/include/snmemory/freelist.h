@@ -79,7 +79,8 @@ SN_FORCE_INLINE void sn_freelist_allocator_deinit(SnFreeListAllocator *alloc) {
  * @param mem Pointer to the new memory (must be right next to current memory).
  * @param size Size of the new memory.
  */
-void sn_freelist_allocator_increase_memory_size(SnFreeListAllocator *alloc, void *mem, uint64_t size);
+SN_MEMORY_API void
+    sn_freelist_allocator_increase_memory_size(SnFreeListAllocator *alloc, void *mem, uint64_t size);
 
 /**
  * @brief Allocate memory from free-list allocator.
