@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.3] - 2026-09-28
+
+### Fixed
+- sn_vm_get_page_size() narrowed the sysconf result with SN_MAX(0, ps), which
+  turned the documented -1 error return into a page size of zero instead of
+  reporting it. Every caller then passed a length of zero: mprotect with a length
+  of zero succeeds and protects nothing, and munmap rejects it with EINVAL, so a
+  released range could stay mapped. SN_ASSERT is compiled out in release, so it
+  did not catch this either. The result is now checked before it is narrowed, and
+  a failed query falls back to the smallest page size these platforms use
+
 ## [0.3.2] - 2026-09-28
 
 ### Fixed
