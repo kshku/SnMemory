@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15...3.31)
 
-project(SnMemory VERSION 0.3.3 DESCRIPTION "Memory allocators" LANGUAGES C)
+project(SnMemory VERSION 0.3.4 DESCRIPTION "Memory allocators" LANGUAGES C)
 
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -23,6 +23,7 @@ set(gcc_clang_comp "$<COMPILE_LANG_AND_ID:C,Clang,GNU>")
 set(msvc_comp "$<COMPILE_LANG_AND_ID:C,MSVC>")
 
 target_compile_options(sn_memory_configs INTERFACE "$<${gcc_clang_comp}:-Wall;-Wextra;-Wformat;-Wuninitialized;-Wpedantic>")
+target_compile_options(sn_memory_configs INTERFACE "$<${gcc_clang_comp}:-Wconversion;-Wsign-conversion>")
 
 target_compile_options(sn_memory_configs INTERFACE "$<${gcc_clang_comp}:-fvisibility=hidden>")
 
