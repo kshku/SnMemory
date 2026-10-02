@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.3.6] - 2026-10-02
+
+### Fixed
+- sn_freelist_allocator_reallocate() split a node at new_size + align without
+  first checking the node was that big, in both of its in-place paths. The
+  shrink path tested the space measured from the user pointer, which does not
+  cover the node header or the alignment padding ahead of it, and the extend
+  path compared the merged size against new_size and left out the alignment
+  reserve that sn_freelist_allocator_allocate() adds before it looks for a
+  node. A node landing in the gap between the two made the subtraction in
+  split_node_if_possible() underflow instead of going negative, so it split
+  anyway and left a free node reaching past the end of the block, sized close
+  to UINT64_MAX. That node covered whatever was allocated above it, so a later
+  allocation could hand out memory another block was still using. Growing the
+  three arrays of a sparse set out of one free list hit this and aborted on a
+  key that came back present twice. Both paths now require the node to cover
+  new_size + align and fall through to moving the block when it does not, and
+  split_node_if_possible() refuses a size it cannot cover
+
 ## [0.3.5] - 2026-10-02
 
 ### Changed
