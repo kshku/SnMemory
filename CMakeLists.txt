@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15...3.31)
 
-project(SnMemory VERSION 0.3.4 DESCRIPTION "Memory allocators" LANGUAGES C)
+project(SnMemory VERSION 0.3.5 DESCRIPTION "Memory allocators" LANGUAGES C)
 
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -9,7 +9,7 @@ set(CMAKE_C_STANDARD 17)
 include(FetchContent)
 FetchContent_Declare(sncore
     GIT_REPOSITORY https://github.com/kshku/SnCore.git
-    GIT_TAG v0.3.1
+    GIT_TAG v0.3.2
 )
 FetchContent_MakeAvailable(sncore)
 
