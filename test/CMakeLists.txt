@@ -30,6 +30,11 @@ target_link_libraries(freelist_grow_test PRIVATE snmemory)
 
 add_test(NAME freelist_grow_test COMMAND freelist_grow_test)
 
+add_executable(freelist_realloc_test freelist_realloc_test.c)
+target_link_libraries(freelist_realloc_test PRIVATE snmemory)
+
+add_test(NAME freelist_realloc_test COMMAND freelist_realloc_test)
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND SN_MEMORY_BUILD_SHARED)
     add_custom_target(copy_dlls ALL
         COMMENT "Copy the dlls"

@@ -78,7 +78,11 @@ void *sn_freelist_allocator_reallocate(SnFreeListAllocator *alloc, void *ptr, ui
         freenode = freenode->next;
     }
 
-    if (current_size >= new_size) {
+    // Splitting a node hands out new_size + align bytes of it, see
+    // split_node_if_possible, so a node is only big enough when it can cover that
+    // much. Testing the space available from ptr alone does not imply it, because
+    // the header and the alignment padding ahead of ptr are not part of that space.
+    if (current_size >= new_size + align) {
         // Fake this node as freenode and make it point to next free node
         if (previous_freenode) node->next = previous_freenode->next;
         else node->next = alloc->free_list;
@@ -95,8 +99,11 @@ void *sn_freelist_allocator_reallocate(SnFreeListAllocator *alloc, void *ptr, ui
         return ptr;
     }
 
-    // Try to extend
-    if (freenode == (SnFreeNode *)NODE_END(node) && (node->size + freenode->size + sizeof(SnFreeNode)) > new_size) {
+    // Try to extend. Same requirement as above: the merged node has to cover the
+    // new_size + align that the split below takes out of it, otherwise this has to
+    // fall through and move the block instead.
+    if (freenode == (SnFreeNode *)NODE_END(node)
+        && (node->size + freenode->size + sizeof(SnFreeNode)) >= (new_size + align)) {
         // We have a freenode right next to this node
 
         // Merge both nodes
@@ -214,6 +221,11 @@ static void try_merge(SnFreeNode *previous_node, SnFreeNode *node) {
 }
 
 static void split_node_if_possible(SnFreeNode *node, uint64_t allocated_size) {
+    // Splitting hands out allocated_size bytes measured from the end of the header,
+    // so a node smaller than that has nothing to split off. Tested this way round
+    // because the subtraction below would underflow instead of going negative.
+    if (node->size < allocated_size) return;
+
     if (node->size - allocated_size < SPLITTING_THRESHOLD) return;  // Not enough space to split
 
     SnFreeNode *new_node = SN_GET_ALIGNED_PTR(((uint8_t *)(node + 1)) + allocated_size, SnFreeNode);
