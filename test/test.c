@@ -18,7 +18,7 @@
 #define MB(x) ((x) * 1024ULL * 1024ULL)
 
 static uint64_t rand_range(uint64_t min, uint64_t max) {
-    return min + (rand() % (max - min + 1));
+    return min + ((uint64_t)rand() % (max - min + 1));  // rand() is non negative
 }
 
 static void fill_pattern(void *ptr, size_t size, uint8_t seed) {
@@ -636,7 +636,7 @@ int main(void) {
     printf("Running allocator tests %d times...\n\n", n);
 
     for (int run = 0; run < n; ++run) {
-        srand((unsigned)time(NULL) + run);
+        srand((unsigned)time(NULL) + (unsigned)run);
         // srand(0xC0FFEE + run);
 
         /* Linear allocator */
